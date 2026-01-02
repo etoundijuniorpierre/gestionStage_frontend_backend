@@ -1,23 +1,15 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { FiMail, FiEye, FiEyeOff } from 'react-icons/fi';
-import { create } from 'zustand';
-import logo from '../assets/logo.png';
+import { FiMail, FiLock } from 'react-icons/fi';
+import { motion } from 'framer-motion';
+import { useNavigate, Link } from 'react-router-dom';
 import { login } from '../api/authApi';
 import { useAuthStore } from '../store/authStore';
-import { useNavigate, Link, useLocation } from 'react-router-dom';
-
-interface LoginState {
-  error: string;
-  setError: (msg: string) => void;
-  clearError: () => void;
-}
-
-const useLoginStore = create<LoginState>((set) => ({
-  error: '',
-  setError: (msg: string) => set((state) => ({ ...state, error: msg })),
-  clearError: () => set((state) => ({ ...state, error: '' })),
-}));
+import { useToastStore } from '../store/toastStore';
+import Button from './ui/Button';
+import Input from './ui/Input';
+import Card from './ui/Card';
+import logo from '../assets/logo.png';
 
 interface LoginFormInputs {
   email: string;
@@ -26,112 +18,166 @@ interface LoginFormInputs {
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const { register, handleSubmit } = useForm<LoginFormInputs>();
-  const [showPassword, setShowPassword] = useState(false);
-  const { error, setError, clearError } = useLoginStore();
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormInputs>();
+  const [isLoading, setIsLoading] = useState(false);
   const setAuth = useAuthStore((state) => state.login);
+  const toast = useToastStore();
 
-
-  const onSubmit = async (data: LoginFormInputs) => {
+  const onSubmit = async (formData: LoginFormInputs) => {
+    setIsLoading(true);
+    
     try {
-      const response = await login(data);
-      console.log('Réponse login:', response.data);
-      const { token, role } = response.data;
-      console.log('Token:', token);
-      console.log('Role:', role);
-      
-      if (token && role) {
-        setAuth(token, role);
-        clearError();
+      const response = await login(formData);
+      // 'response' corresponds to the 'ApiResponse' object returned by the interceptor
+      if (response && response.success && response.data) {
+        const { token, role, name } = response.data;
         
-        console.log('Redirection vers:', role);
-        // Redirection automatique selon le rôle
-        if (role === 'STUDENT') {
-          navigate('/etudiant/stages');
-        } else if (role === 'TEACHER') {
-          navigate('/enseignant/offres');
-        } else if (role === 'ENTERPRISE') {
-          navigate('/entreprise/offres');
-        } else if (role === 'ADMIN') {
-          navigate('/admin/dashboard');
-        } else {
-          console.log('Role non reconnu, redirection vers /');
-          navigate('/');
+        if (token && role) {
+          setAuth(token, role);
+          toast.success(`Welcome back, ${name || 'User'}!`);
+          
+          // Redirection selon le rôle
+          setTimeout(() => {
+            if (role === 'STUDENT') {
+              navigate('/etudiant/stages');
+            } else if (role === 'TEACHER') {
+              navigate('/enseignant/offres');
+            } else if (role === 'ENTERPRISE') {
+              navigate('/entreprise/offres');
+            } else if (role === 'ADMIN') {
+              navigate('/admin/dashboard');
+            }
+          }, 500);
         }
-      } else {
-        console.log('Token ou role manquant');
-        setError('Réponse de connexion invalide');
       }
-    } catch (error) {
-      console.log('Erreur login:', error);
-      setError('Identifiants incorrects');
+    } catch (error: any) {
+      console.error('Login error:', error);
+      const errorMessage = error.response?.data?.message || 'Invalid credentials';
+      toast.error(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-login-gradient">
-      <div className='flex flex-col justify-center mb-32 '>
-        <img src={logo} alt="Logo" className="max-w-[350px] mx-auto " />
-        <p className='text-[#e1d3c1] text-center mx-auto space'>ELITE</p>
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-neutral-900 to-cyan-900 flex items-center justify-center p-4">
+      {/* Background Effects */}
+      <div className="absolute inset-0 overflow-hidden">
+        <motion.div
+          className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl"
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.3, 0.5, 0.3],
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+          }}
+        />
+        <motion.div
+          className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl"
+          animate={{
+            scale: [1.2, 1, 1.2],
+            opacity: [0.3, 0.5, 0.3],
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            delay: 1,
+          }}
+        />
       </div>
-        <form className="max-w-80 mx-auto" onSubmit={handleSubmit(onSubmit)}>
-           <div className="text-xs text-red-600 min-h-[1.5em] text-left">
-              {error && 'Identifiants incorrects'}
+
+      {/* Login Card */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-md relative z-10"
+      >
+        <Card variant="glass" className="backdrop-blur-xl">
+          {/* Logo */}
+          <div className="flex flex-col items-center mb-8">
+            <motion.img
+              src={logo}
+              alt="Logo"
+              className="w-32 h-32 object-contain mb-4"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: 'spring', duration: 0.6 }}
+            />
+            <h1 className="text-3xl font-bold gradient-text">
+              ELITE
+            </h1>
+            <p className="text-neutral-400 mt-2">Internship Management System</p>
+          </div>
+
+          {/* Form */}
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <Input
+              label="Email"
+              type="email"
+              placeholder="your.email@example.com"
+              leftIcon={<FiMail className="w-5 h-5" />}
+              error={errors.email?.message}
+              {...register('email', {
+                required: 'Email is required',
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                  message: 'Invalid email address',
+                },
+              })}
+            />
+
+            <Input
+              label="Password"
+              type="password"
+              placeholder="••••••••"
+              leftIcon={<FiLock className="w-5 h-5" />}
+              error={errors.password?.message}
+              {...register('password', {
+                required: 'Password is required',
+                minLength: {
+                  value: 6,
+                  message: 'Password must be at least 6 characters',
+                },
+              })}
+            />
+
+            <div className="flex items-center justify-between text-sm">
+              <Link
+                to="/reset-password"
+                className="text-purple-400 hover:text-purple-300 transition-colors"
+              >
+                Forgot password?
+              </Link>
+              <Link
+                to="/register"
+                className="text-cyan-400 hover:text-cyan-300 transition-colors"
+              >
+                Create account
+              </Link>
             </div>
-          <label className="flex justify-between items-center text-[#e2e2e2] mb-1" htmlFor="email">
-            <span>Email</span>
-            <FiMail className="text-xl" />
-          </label>
-          <input
-            id="email"
-            type="email"
-            autoComplete="email"
-            placeholder='-'
-            className="w-full mb-4 border text-center border-gray-300 bg-[#e1d3c1] rounded focus:outline-none"
-            {...register('email', { required: 'Email requis' })}
-          />
-          <label className="flex justify-between items-center text-[#e2e2e2] mb-1" htmlFor="password">
-            <span>Mot de passe</span>
-            <button
-              type="button"
-              tabIndex={-1}
-              className="focus:outline-none cursor-pointer"
-              onClick={() => setShowPassword((v) => !v)}
+
+            <Button
+              type="submit"
+              variant="gradient"
+              size="lg"
+              fullWidth
+              isLoading={isLoading}
             >
-              {showPassword ? <FiEyeOff className="text-xl" /> : <FiEye className="text-xl" />}
-            </button>
-          </label>
-          <input
-            id="password"
-            type={showPassword ? 'text' : 'password'}
-            autoComplete="current-password"
-            placeholder='-'
-            className="w-full mb-2 bg-[#e1d3c1] text-center border border-gray-300 rounded focus:outline-none"
-            {...register('password', { required: 'Mot de passe requis' })}
-          />
-        
-          <button
-            type="submit"
-            className="w-full bg-[#58693e] cursor-pointer text-white py-1 mt-5 rounded transition-colors"
-          >
-            Se connecter
-          </button>
-            <div className="flex justify-between items-center mt-2 mb-4">
-              <div className="">
-            <Link to="/reset-password" className="text-xs text-[#e1d3c1] hover:text-white hover:underline transition-colors">
-              Mot de passe oublié ?
-            </Link>
+              Sign In
+            </Button>
+          </form>
+
+          {/* Footer */}
+          <div className="mt-8 pt-6 border-t border-white/10 text-center">
+            <p className="text-sm text-neutral-400">
+              Secure authentication powered by JWT
+            </p>
           </div>
-           
-            <div className="text-xs text-white hover:underline">
-              <Link to="/register" className="text-xs text-white hover:underline">Créer un compte?</Link>
-            </div>
-          </div>
-          
-          {/* Lien mot de passe oublié */}
-          
-        </form>
+        </Card>
+      </motion.div>
     </div>
   );
 };

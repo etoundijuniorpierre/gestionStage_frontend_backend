@@ -1,9 +1,9 @@
 package com.internship.management.controllers;
 
-
 import com.internship.management.dto.StudentResponseDto;
 import com.internship.management.dto.TeacherResponseDto;
 import com.internship.management.dto.postOffer.EnterpriseResponseDto;
+import com.internship.management.dto.response.ApiResponse;
 import com.internship.management.entities.Enterprise;
 import com.internship.management.entities.Student;
 import com.internship.management.entities.Teacher;
@@ -12,10 +12,13 @@ import com.internship.management.interfaces.ChartInterface;
 import com.internship.management.interfaces.NotificationInterface;
 import com.internship.management.interfaces.PostOffer;
 import com.internship.management.mappers.PostOfferMapper;
+import com.internship.management.util.PaginationUtil;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -27,10 +30,12 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping(path = "/api/admin")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "JWT")
+@Tag(name = "Admin Controller", description = "Endpoints pour les actions administratives")
 public class AdminController {
 
     private final ChartInterface chartInterface;
@@ -38,83 +43,100 @@ public class AdminController {
     private final PostOfferMapper postOfferMapper;
     private final NotificationInterface notificationInterface;
 
+    @Operation(summary = "Exporter les statistiques de stage en Excel")
     @GetMapping("/internships.xlsx")
     public ResponseEntity<byte[]> downloadInternshipsExcel() throws IOException {
-
         ByteArrayInputStream stream = chartInterface.exportInternshipsByDepartment();
-
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=internshipBySector" + LocalDate.now() + ".xlsx")
-                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=internshipBySector_" + LocalDate.now() + ".xlsx")
+                .contentType(
+                        MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
                 .body(stream.readAllBytes());
     }
 
+    @Operation(summary = "Récupérer les entreprises en attente de validation")
     @GetMapping("/approvalPendingEnterprise")
-    public List<EnterpriseResponseDto> getPendingValidationEnterprise(){
+    public ResponseEntity<ApiResponse<List<EnterpriseResponseDto>>> getPendingValidationEnterprise(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
 
-        List<Enterprise> listOfEnterprise = postOffer.getEnterpriseByPartnershipFalse();
-        return postOfferMapper.toDtoEnterpriseList(listOfEnterprise);
+        Pageable pageable = PaginationUtil.createPageable(page, size, "name");
+        Page<Enterprise> enterprisePage = postOffer.getEnterpriseByPartnershipFalsePaged(pageable);
+
+        List<EnterpriseResponseDto> dtos = postOfferMapper.toDtoEnterpriseList(enterprisePage.getContent());
+        ApiResponse.PageInfo pageInfo = PaginationUtil.createPageInfo(enterprisePage);
+
+        return ResponseEntity.ok(ApiResponse.success("Pending enterprises retrieved", dtos, pageInfo));
     }
 
+    @Operation(summary = "Récupérer toutes les entreprises en partenariat")
     @GetMapping("/enterpriseInPartnership")
-    public List<EnterpriseResponseDto> getEnterpriseInPartnership(){
+    public ResponseEntity<ApiResponse<List<EnterpriseResponseDto>>> getEnterpriseInPartnership(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
 
-        List<Enterprise> listOfEnterpriseInPartnership = postOffer.getEnterpriseByPartnershipTrue();
-        return postOfferMapper.toDtoEnterpriseList(listOfEnterpriseInPartnership);
+        Pageable pageable = PaginationUtil.createPageable(page, size, "name");
+        Page<Enterprise> enterprisePage = postOffer.getEnterpriseByPartnershipTruePaged(pageable);
+
+        List<EnterpriseResponseDto> dtos = postOfferMapper.toDtoEnterpriseList(enterprisePage.getContent());
+        ApiResponse.PageInfo pageInfo = PaginationUtil.createPageInfo(enterprisePage);
+
+        return ResponseEntity.ok(ApiResponse.success("Partner enterprises retrieved", dtos, pageInfo));
     }
 
+    @Operation(summary = "Récupérer tous les enseignants avec pagination")
     @GetMapping("/allTeachers")
-    public ResponseEntity<List<TeacherResponseDto>> getAllTeachers(){
+    public ResponseEntity<ApiResponse<List<TeacherResponseDto>>> getAllTeachers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
 
-        List<Teacher> teachers = postOffer.getAllTeachers();
-        return ResponseEntity.ok(postOfferMapper.toDtoTeacherList(teachers));
+        Pageable pageable = PaginationUtil.createPageable(page, size, "lastName");
+        Page<Teacher> teacherPage = postOffer.getAllTeacherByPagination(pageable);
+
+        List<TeacherResponseDto> dtos = postOfferMapper.toDtoTeacherList(teacherPage.getContent());
+        ApiResponse.PageInfo pageInfo = PaginationUtil.createPageInfo(teacherPage);
+
+        return ResponseEntity.ok(ApiResponse.success("Teachers retrieved successfully", dtos, pageInfo));
     }
 
+    @Operation(summary = "Récupérer tous les étudiants avec pagination")
     @GetMapping("/allStudent")
-    public ResponseEntity<List<StudentResponseDto>> getAllStudents(){
+    public ResponseEntity<ApiResponse<List<StudentResponseDto>>> getAllStudents(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
 
-        List<Student> students = postOffer.getAllStudent();
-        return ResponseEntity.ok(postOfferMapper.toDtoStudentList(students));
+        Pageable pageable = PaginationUtil.createPageable(page, size, "lastName");
+        Page<Student> studentPage = postOffer.getAllStudentByPagination(pageable);
+
+        List<StudentResponseDto> dtos = postOfferMapper.toDtoStudentList(studentPage.getContent());
+        ApiResponse.PageInfo pageInfo = PaginationUtil.createPageInfo(studentPage);
+
+        return ResponseEntity.ok(ApiResponse.success("Students retrieved successfully", dtos, pageInfo));
     }
 
-    @GetMapping("/teacherPagination")
-    public Page<TeacherResponseDto> getTeacherPagination(Pageable pageable){
-
-        Page<Teacher> saveTeacher = postOffer.getAllTeacherByPagination(pageable);
-        List<TeacherResponseDto>  teachers =  postOfferMapper.toDtoTeacherList(saveTeacher.getContent());
-
-        return new PageImpl<>(teachers, pageable, teachers.size());
-    }
-
-    @GetMapping("/studentPagination")
-    public Page<StudentResponseDto> getStudentPagination(Pageable pageable){
-
-        Page<Student> saveStudent = postOffer.getAllStudentByPagination(pageable);
-        List<StudentResponseDto>  students =  postOfferMapper.toDtoStudentList(saveStudent.getContent());
-
-        return new PageImpl<>(students, pageable, students.size());
-    }
-
+    @Operation(summary = "Approuver ou rejeter une entreprise")
     @PutMapping("/Enterprise/{id}/approve")
-    public ResponseEntity<EnterpriseResponseDto> approveEnterprise(@PathVariable Long id, @RequestParam boolean approved){
+    public ResponseEntity<ApiResponse<EnterpriseResponseDto>> approveEnterprise(
+            @PathVariable Long id,
+            @RequestParam boolean approved) {
 
         Enterprise enterprise = postOffer.getByEnterpriseId(id);
-        String enterpriseMsg = approved? "Ton enterprise a été approuvée sur notre plateforme de gestion de stage":
-                "Ton enterprise a été rejetée sur notre plateforme de gestion de stage";
+        String msg = approved ? "Ton entreprise a été approuvée" : "Ton entreprise a été rejetée";
 
-        if(approved){
-
+        if (approved) {
             enterprise.setEnterpriseState(EnterpriseState.APPROVED);
             enterprise.setInPartnership(true);
-            postOffer.saveUser(enterprise);
-            notificationInterface.sendNotification(enterprise, enterpriseMsg);
-
-        }else{
-
+        } else {
             enterprise.setEnterpriseState(EnterpriseState.REJECTED);
-            notificationInterface.sendNotification(enterprise, enterpriseMsg);
+            enterprise.setInPartnership(false);
         }
 
-        return ResponseEntity.ok(postOfferMapper.toDtoEnterprise(enterprise));
+        postOffer.saveUser(enterprise);
+        notificationInterface.sendNotification(enterprise, msg);
+
+        log.info("Enterprise {} processed with approved={}", enterprise.getEmail(), approved);
+
+        return ResponseEntity.ok(ApiResponse.success(msg, postOfferMapper.toDtoEnterprise(enterprise)));
     }
 }

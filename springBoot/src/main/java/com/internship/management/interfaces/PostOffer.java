@@ -12,69 +12,95 @@ import java.util.List;
 
 public interface PostOffer {
 
-    Offer getOfferById(Long id);
+        Offer getOfferById(Long id);
 
-    void saveOffer(Offer offer);
+        void saveOffer(Offer offer);
 
-    Teacher getTeacherByEmail(String email);
+        Teacher getTeacherByEmail(String email);
 
-    Enterprise getByEnterpriseEmail(String email);
+        Enterprise getByEnterpriseEmail(String email);
 
-    List<Offer> getOffersByStatusAndConventionApproved(OfferStatus offerStatus, ConventionState conventionState, String domain);
+        List<Offer> getOffersByStatusAndConventionApproved(OfferStatus offerStatus, ConventionState conventionState,
+                        String domain);
 
-    Student getStudentByEmail(String email);
+        Page<Offer> getOffersByStatusAndConventionApprovedPaged(OfferStatus offerStatus,
+                        ConventionState conventionState,
+                        String domain, Pageable pageable);
 
-    void saveApplication(Application application);
+        Student getStudentByEmail(String email);
 
-    List<Application> getAllApplicationsByEnterpriseId(Long id);
+        void saveApplication(Application application);
 
-    Enterprise getByEnterpriseId(Long id);
+        List<Application> getAllApplicationsByEnterpriseId(Long id);
 
-    void deleteUser(Long id);
+        Page<Application> getAllApplicationsByEnterpriseIdPaged(Long id, Pageable pageable);
 
-    List<Offer> getOfferByEnterpriseId(Long enterpriseId);
+        Enterprise getByEnterpriseId(Long id);
 
-    Users getUserByEmail(String email);
+        void deleteUser(Long id);
 
-    void saveUser(Users user);
+        List<Offer> getOfferByEnterpriseId(Long enterpriseId);
 
-    Application getApplicationById(Long id);
+        Page<Offer> getOfferByEnterpriseIdPaged(Long enterpriseId, Pageable pageable);
 
-    List<Student> getStudentsByDepartment(String department);
+        Users getUserByEmail(String email);
 
-    Logo getLogoByEnterprise(Enterprise enterprise);
+        void saveUser(Users user);
 
-    Convention getConventionByOfferId(Long offerId);
+        Application getApplicationById(Long id);
 
-    List<Enterprise> getEnterpriseByPartnershipFalse();
+        List<Student> getStudentsByDepartment(String department);
 
-    List<Offer> getOfferByDepartmentAndPendingOfferStatusAndInPartnershipTrue(String department, OfferStatus offerStatus);
+        Page<Student> getStudentsByDepartmentPaged(String department, Pageable pageable);
 
-    List<Teacher> getAllTeachers();
+        Logo getLogoByEnterprise(Enterprise enterprise);
 
-    List<Student> getAllStudent();
+        Convention getConventionByOfferId(Long offerId);
 
-    void saveConvention (Convention convention);
+        List<Enterprise> getEnterpriseByPartnershipFalse();
 
-    Page<Teacher> getAllTeacherByPagination(Pageable pageable);
+        Page<Enterprise> getEnterpriseByPartnershipFalsePaged(Pageable pageable);
 
-    Page<Student> getAllStudentByPagination(Pageable pageable);
+        List<Offer> getOfferByDepartmentAndPendingOfferStatusAndInPartnershipTrue(String department,
+                        OfferStatus offerStatus);
 
-    List<Enterprise> getEnterpriseByPartnershipTrue();
+        Page<Offer> getOfferByDepartmentAndPendingOfferStatusAndInPartnershipTruePaged(String department,
+                        OfferStatus offerStatus, Pageable pageable);
 
-    List<Offer> getOffersByStatusApprovedAndTeacherEmail(OfferStatus offerStatus, String email);
+        List<Teacher> getAllTeachers();
 
-    List<Application> getApplicationsRejectedOrPendingByStudentEmail(String email);
+        List<Student> getAllStudent();
 
-    List<Application> getApplicationsApprovedByStudentEmail(String email);
+        void saveConvention(Convention convention);
 
-    Application getApplicationApprovedById(Long id);
+        Page<Teacher> getAllTeacherByPagination(Pageable pageable);
 
-    Application getApplicationByStudentOnInternshipTrue(Student student);
+        Page<Student> getAllStudentByPagination(Pageable pageable);
 
-    List<Teacher> getTeachersByDepartment(String department);
+        List<Enterprise> getEnterpriseByPartnershipTrue();
 
-    void deleteApplicationRejected(Long id);
+        Page<Enterprise> getEnterpriseByPartnershipTruePaged(Pageable pageable);
 
-    void updateLogo(Long enterpriseId, MultipartFile file) throws IOException;
+        List<Offer> getOffersByStatusApprovedAndTeacherEmail(OfferStatus offerStatus, String email);
+
+        Page<Offer> getOffersByStatusApprovedAndTeacherEmailPaged(OfferStatus offerStatus, String email,
+                        Pageable pageable);
+
+        List<Application> getApplicationsApprovedByStudentEmail(String email);
+
+        Page<Application> getApplicationsApprovedByStudentEmailPaged(String email, Pageable pageable);
+
+        List<Application> getApplicationsRejectedOrPendingByStudentEmail(String email);
+
+        Page<Application> getApplicationsRejectedOrPendingByStudentEmailPaged(String email, Pageable pageable);
+
+        Application getApplicationApprovedById(Long id);
+
+        Application getApplicationByStudentOnInternshipTrue(Student student);
+
+        List<Teacher> getTeachersByDepartment(String department);
+
+        void deleteApplicationRejected(Long id);
+
+        void updateLogo(Long enterpriseId, MultipartFile file) throws IOException;
 }

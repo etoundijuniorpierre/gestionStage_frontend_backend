@@ -1,7 +1,9 @@
-
-import './App.css'
+import React from 'react';
+import './styles/globals.css';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
+import { ThemeProvider } from './contexts/ThemeContext';
+import ToastContainer from './components/ui/ToastContainer';
 import OffersList from './components/teacher/OffersList';
 import EntreprisesList from './components/teacher/EntreprisesList';
 import EnterpriseDetail from './components/teacher/EnterpriseDetail';
@@ -119,9 +121,12 @@ const PageWrapper = ({ children }: { children: React.ReactNode }) => {
 
 const App = () => {
   return (
-    <Router>
-      <AnimatedRoutes />
-    </Router>
+    <ThemeProvider>
+      <Router>
+        <ToastContainer />
+        <AnimatedRoutes />
+      </Router>
+    </ThemeProvider>
   );
 };
 

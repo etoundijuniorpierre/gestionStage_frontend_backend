@@ -1,11 +1,11 @@
 package com.internship.management.controllers;
 
-
 import com.internship.management.dto.InternshipStatDto;
 import com.internship.management.dto.StudentResponseDto;
 import com.internship.management.dto.postOffer.EnterpriseResponseDto;
 import com.internship.management.dto.postOffer.OfferValidationRequestDto;
 import com.internship.management.dto.postOffer.OfferResponseDto;
+import com.internship.management.dto.response.ApiResponse;
 import com.internship.management.entities.*;
 import com.internship.management.enums.ConventionState;
 import com.internship.management.enums.OfferStatus;
@@ -14,8 +14,14 @@ import com.internship.management.interfaces.DepartmentInternshipStat;
 import com.internship.management.interfaces.NotificationInterface;
 import com.internship.management.interfaces.PostOffer;
 import com.internship.management.mappers.PostOfferMapper;
+import com.internship.management.util.PaginationUtil;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -23,10 +29,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @RestController
-@RequestMapping(path ="api/teacher")
+@RequestMapping(path = "api/teacher")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "JWT")
+@Tag(name = "Teacher Controller", description = "Endpoints pour les actions spécifiques aux enseignants")
 public class TeacherController {
 
     private final PostOffer postOffer;
@@ -34,31 +42,49 @@ public class TeacherController {
     private final NotificationInterface notificationInterface;
     private final ChartInterface chartInterface;
 
+    @Operation(summary = "Récupérer les offres à valider pour le département")
     @GetMapping("/offerToReview")
-    public ResponseEntity<List<OfferResponseDto>> getOffersToReviewByDepartment(){
+    public ResponseEntity<ApiResponse<List<OfferResponseDto>>> getOffersToReviewByDepartment(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
 
         Teacher teacher = postOffer.getTeacherByEmail(email);
-        List<Offer> offers = postOffer.getOfferByDepartmentAndPendingOfferStatusAndInPartnershipTrue(teacher.getDepartment(), OfferStatus.PENDING);
 
-        return ResponseEntity.ok(postOfferMapper.toDtoList(offers));
+        Pageable pageable = PaginationUtil.createPageable(page, size, "createdAt");
+        Page<Offer> offerPage = postOffer.getOfferByDepartmentAndPendingOfferStatusAndInPartnershipTruePaged(
+                teacher.getDepartment(), OfferStatus.PENDING, pageable);
+
+        List<OfferResponseDto> dtos = postOfferMapper.toDtoList(offerPage.getContent());
+        ApiResponse.PageInfo pageInfo = PaginationUtil.createPageInfo(offerPage);
+
+        return ResponseEntity.ok(ApiResponse.success("Offers to review retrieved successfully", dtos, pageInfo));
     }
 
+    @Operation(summary = "Récupérer les offres approuvées par l'enseignant")
     @GetMapping("/offersApprovedByTeacher")
-    public ResponseEntity<List<OfferResponseDto>> getOffersApprovedByTeacher(){
+    public ResponseEntity<ApiResponse<List<OfferResponseDto>>> getOffersApprovedByTeacher(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
 
-        List<Offer> offers = postOffer.getOffersByStatusApprovedAndTeacherEmail(OfferStatus.APPROVED, email);
+        Pageable pageable = PaginationUtil.createPageable(page, size, "createdAt");
+        Page<Offer> offerPage = postOffer.getOffersByStatusApprovedAndTeacherEmailPaged(OfferStatus.APPROVED, email,
+                pageable);
 
-        return ResponseEntity.ok(postOfferMapper.toDtoList(offers));
+        List<OfferResponseDto> dtos = postOfferMapper.toDtoList(offerPage.getContent());
+        ApiResponse.PageInfo pageInfo = PaginationUtil.createPageInfo(offerPage);
+
+        return ResponseEntity.ok(ApiResponse.success("Approved offers retrieved successfully", dtos, pageInfo));
     }
 
+    @Operation(summary = "Valider ou rejeter une offre et sa convention")
     @PutMapping("/offers/{id}/validate")
-    public ResponseEntity<String> validateOfferAndConvention(
+    public ResponseEntity<ApiResponse<String>> validateOfferAndConvention(
             @PathVariable Long id,
             @RequestBody OfferValidationRequestDto offerValidationRequest) {
 
@@ -66,81 +92,92 @@ public class TeacherController {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
-
         Teacher teacher = postOffer.getTeacherByEmail(email);
 
         if (offer.getStatus() != OfferStatus.PENDING) {
-            throw new IllegalStateException("Offer already processed.");
+            return ResponseEntity.badRequest().body(ApiResponse.error("Offer already processed."));
         }
 
         offer.setStatus(offerValidationRequest.isOfferApproved() ? OfferStatus.APPROVED : OfferStatus.REJECTED);
-        Convention convention;
+        offer.setValidatedBy(teacher);
 
-        if (offer.getConvention() != null) {
-            convention = offer.getConvention();
-
+        Convention convention = offer.getConvention();
+        if (convention != null) {
             if (convention.getConventionState() == ConventionState.PENDING) {
                 convention.setConventionState(offerValidationRequest.isConventionApproved()
                         ? ConventionState.APPROVED
                         : ConventionState.REJECTED);
-
-                offer.setValidatedBy(teacher);
-                offer.setConvention(convention);
             }
         }
 
         postOffer.saveOffer(offer);
 
         Enterprise enterprise = offer.getEnterprise();
+        String enterpriseMsg = (offer.getStatus() == OfferStatus.APPROVED)
+                ? "Ton offre \"" + offer.getTitle() + "\" a été approuvée par l'enseignant " + teacher.getName()
+                : "Ton offre \"" + offer.getTitle() + "\" a été rejetée par l'enseignant " + teacher.getName();
 
-        String enterpriseMsg =  "Ton offre" + offer.getTitle() + " a été approuvée par l'enseignant " + offer.getValidatedBy().getName();
         notificationInterface.sendNotification(enterprise, enterpriseMsg);
 
-        if(offer.getStatus() == OfferStatus.APPROVED && offer.getConvention().getConventionState() == ConventionState.APPROVED){
-            String studentMsg = "Nouvelle offre approuvée par: " + offer.getValidatedBy().getName();
-
+        if (offer.getStatus() == OfferStatus.APPROVED && convention != null
+                && convention.getConventionState() == ConventionState.APPROVED) {
+            String studentMsg = "Nouvelle offre approuvée dans votre département par: " + teacher.getName();
             List<Student> studentsInDepartment = postOffer.getStudentsByDepartment(teacher.getDepartment());
-
             for (Student s : studentsInDepartment) {
                 notificationInterface.sendNotification(s, studentMsg);
             }
-
-        }else{
-            enterpriseMsg =  "Ton offre \"" + offer.getTitle() + "\" a été rejeté par l'enseignant " + offer.getValidatedBy().getName();
-            notificationInterface.sendNotification(enterprise, enterpriseMsg);
         }
 
-        return ResponseEntity.ok("Offer: " + offer.getStatus()
-                + ", Convention: "
-                + (offer.getConvention() != null ? offer.getConvention().getConventionState() : "None"));
+        String result = "Offer: " + offer.getStatus() + ", Convention: " +
+                (convention != null ? convention.getConventionState() : "None");
+
+        return ResponseEntity.ok(ApiResponse.success("Offer validation processed", result));
     }
 
+    @Operation(summary = "Statistiques de stage par département")
     @GetMapping("/internshipsByDepartment")
-    public List<InternshipStatDto> getInternshipStats() {
+    public ResponseEntity<ApiResponse<List<InternshipStatDto>>> getInternshipStats() {
 
         List<DepartmentInternshipStat> stats = chartInterface.getInternshipsByDepartment();
-
-        return stats.stream()
+        List<InternshipStatDto> dtos = stats.stream()
                 .map(stat -> new InternshipStatDto(stat.getDepartment(), stat.getCount()))
                 .toList();
+
+        return ResponseEntity.ok(ApiResponse.success("Stats retrieved successfully", dtos));
     }
 
+    @Operation(summary = "Liste des étudiants du département")
     @GetMapping("/listOfStudentByDepartment")
-    public List<StudentResponseDto> getStudentByDepartment(){
+    public ResponseEntity<ApiResponse<List<StudentResponseDto>>> getStudentByDepartment(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
 
         Teacher teacher = postOffer.getTeacherByEmail(email);
 
-        List<Student> students = postOffer.getStudentsByDepartment(teacher.getDepartment());
-        return postOfferMapper.toDtoStudentList(students);
+        Pageable pageable = PaginationUtil.createPageable(page, size, "lastName");
+        Page<Student> studentPage = postOffer.getStudentsByDepartmentPaged(teacher.getDepartment(), pageable);
+
+        List<StudentResponseDto> dtos = postOfferMapper.toDtoStudentList(studentPage.getContent());
+        ApiResponse.PageInfo pageInfo = PaginationUtil.createPageInfo(studentPage);
+
+        return ResponseEntity.ok(ApiResponse.success("Students retrieved successfully", dtos, pageInfo));
     }
 
+    @Operation(summary = "Liste des entreprises en partenariat")
     @GetMapping("/enterpriseInPartnership")
-    public List<EnterpriseResponseDto> getEnterpriseInPartnership(){
+    public ResponseEntity<ApiResponse<List<EnterpriseResponseDto>>> getEnterpriseInPartnership(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
 
-        List<Enterprise> listOfEnterpriseInPartnership = postOffer.getEnterpriseByPartnershipTrue();
-        return postOfferMapper.toDtoEnterpriseList(listOfEnterpriseInPartnership);
+        Pageable pageable = PaginationUtil.createPageable(page, size, "name");
+        Page<Enterprise> enterprisePage = postOffer.getEnterpriseByPartnershipTruePaged(pageable);
+
+        List<EnterpriseResponseDto> dtos = postOfferMapper.toDtoEnterpriseList(enterprisePage.getContent());
+        ApiResponse.PageInfo pageInfo = PaginationUtil.createPageInfo(enterprisePage);
+
+        return ResponseEntity.ok(ApiResponse.success("Partner enterprises retrieved successfully", dtos, pageInfo));
     }
 }

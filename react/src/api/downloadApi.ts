@@ -1,77 +1,35 @@
-import { api, getAuthHeaders } from './api';
+import { api } from './api';
 
 // Télécharger un CV par ID de candidature
 export const downloadCV = async (applicationId: number) => {
   try {
-    if (!applicationId || applicationId <= 0) {
-      throw new Error('ID de candidature invalide');
-    }
-    
-    return await api.get(`/downloadFiles/cv/${applicationId}/download`, {
-      responseType: 'blob',
-      headers: getAuthHeaders()
+    return await api.get(`/files/cv/${applicationId}`, {
+      responseType: 'blob'
     });
   } catch (error: any) {
-    if (error.response?.status === 401) {
-      throw new Error('Session expirée. Veuillez vous reconnecter.');
-    }
-    if (error.response?.status === 404) {
-      throw new Error('CV non trouvé');
-    }
-    if (error.response?.status === 403) {
-      throw new Error('Accès non autorisé à ce fichier');
-    }
-    throw new Error(error.response?.data?.message || 'Erreur lors du téléchargement du CV');
+    throw error;
   }
 };
 
 // Télécharger une lettre de motivation par ID de candidature
 export const downloadCoverLetter = async (applicationId: number) => {
   try {
-    if (!applicationId || applicationId <= 0) {
-      throw new Error('ID de candidature invalide');
-    }
-    
-    return await api.get(`/downloadFiles/coverLetter/${applicationId}/download`, {
-      responseType: 'blob',
-      headers: getAuthHeaders()
+    return await api.get(`/files/cover-letter/${applicationId}`, {
+      responseType: 'blob'
     });
   } catch (error: any) {
-    if (error.response?.status === 401) {
-      throw new Error('Session expirée. Veuillez vous reconnecter.');
-    }
-    if (error.response?.status === 404) {
-      throw new Error('Lettre de motivation non trouvée');
-    }
-    if (error.response?.status === 403) {
-      throw new Error('Accès non autorisé à ce fichier');
-    }
-    throw new Error(error.response?.data?.message || 'Erreur lors du téléchargement de la lettre de motivation');
+    throw error;
   }
 };
 
 // Télécharger une convention par ID d'offre
 export const downloadConvention = async (offerId: number) => {
   try {
-    if (!offerId || offerId <= 0) {
-      throw new Error('ID d\'offre invalide');
-    }
-    
-    return await api.get(`/downloadFiles/downloadConvention/${offerId}`, {
-      responseType: 'blob',
-      headers: getAuthHeaders()
+    return await api.get(`/files/convention/${offerId}`, {
+      responseType: 'blob'
     });
   } catch (error: any) {
-    if (error.response?.status === 401) {
-      throw new Error('Session expirée. Veuillez vous reconnecter.');
-    }
-    if (error.response?.status === 404) {
-      throw new Error('Convention non trouvée');
-    }
-    if (error.response?.status === 403) {
-      throw new Error('Accès non autorisé à ce fichier');
-    }
-    throw new Error(error.response?.data?.message || 'Erreur lors du téléchargement de la convention');
+    throw error;
   }
 };
 

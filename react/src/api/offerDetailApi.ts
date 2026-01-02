@@ -1,4 +1,4 @@
-import { api, getAuthHeaders } from './api';
+import { api } from './api';
 import type { OfferResponseDto } from '../types/offer';
 
 // Note: Endpoint générique pour récupérer les détails d'une offre
@@ -25,20 +25,10 @@ export const getOfferById = async (offerId: number): Promise<OfferResponseDto> =
 // Télécharger la convention d'une offre
 export const downloadConvention = async (offerId: number) => {
   try {
-    if (!Number.isInteger(offerId) || offerId <= 0) {
-      throw new Error('ID d\'offre invalide - doit être un entier positif');
-    }
-    return await api.get(`/downloadFiles/downloadConvention/${offerId}`, {
-      responseType: 'blob',
-      headers: getAuthHeaders()
+    return await api.get(`/files/convention/${offerId}`, {
+      responseType: 'blob'
     });
   } catch (error: any) {
-    if (error.response?.status === 404) {
-      throw new Error('Convention non trouvée pour cette offre');
-    }
-    if (error.response?.status === 401) {
-      throw new Error('Session expirée. Veuillez vous reconnecter.');
-    }
-    throw new Error(error.response?.data?.message || 'Erreur lors du téléchargement de la convention');
+    throw error;
   }
 };
