@@ -9,12 +9,10 @@ import org.mapstruct.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.multipart.MultipartFile;
 
-
 import java.io.IOException;
 import java.time.LocalDateTime;
 
-
-@Mapper(componentModel = "spring", imports = {LocalDateTime.class})
+@Mapper(componentModel = "spring", imports = { LocalDateTime.class, java.util.ArrayList.class })
 public interface RegistrationMapper {
 
     UserResponseDto toDto(Enterprise enterprise);
@@ -29,11 +27,10 @@ public interface RegistrationMapper {
     @Mapping(target = "password", expression = "java(passwordEncoder.encode(studentRequestDto.getPassword()))")
     Student toEntity(StudentRegistrationRequestDto studentRequestDto, @Context PasswordEncoder passwordEncoder);
 
-
     @Mapping(target = "role", expression = "java(com.internship.management.enums.Role.ENTERPRISE)")
     @Mapping(target = "password", expression = "java(passwordEncoder.encode(enterpriseRequestDto.getPassword()))")
-    Enterprise toEntity(EnterpriseRegistrationRequestDto enterpriseRequestDto, @Context PasswordEncoder passwordEncoder);
-
+    Enterprise toEntity(EnterpriseRegistrationRequestDto enterpriseRequestDto,
+            @Context PasswordEncoder passwordEncoder);
 
     @Mapping(target = "role", expression = "java(com.internship.management.enums.Role.TEACHER)")
     @Mapping(target = "password", expression = "java(passwordEncoder.encode(teacherRequestDto.getPassword()))")
@@ -45,7 +42,6 @@ public interface RegistrationMapper {
     @Mapping(target = "user", source = "user")
     @Mapping(target = "expirationDate", expression = "java(LocalDateTime.now().plusMinutes(EXPIRATION_MINUTES))")
     VerificationToken verificationTokenUpdate(String code, Users user);
-
 
     @Mapping(target = "code", source = "newCode")
     @Mapping(target = "expirationDate", expression = "java(LocalDateTime.now().plusMinutes(EXPIRATION_MINUTES))")

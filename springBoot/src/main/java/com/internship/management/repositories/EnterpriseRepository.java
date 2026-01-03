@@ -1,7 +1,6 @@
 package com.internship.management.repositories;
 
 import com.internship.management.entities.Enterprise;
-import com.internship.management.entities.Offer;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -87,6 +87,18 @@ public class ApiResponse<T> {
     }
 
     /**
+     * Crée une réponse de succès avec message personnalisé et pagination
+     */
+    public static <T> ApiResponse<T> success(String message, T data, PageInfo pagination) {
+        return ApiResponse.<T>builder()
+                .success(true)
+                .message(message)
+                .data(data)
+                .pagination(pagination)
+                .build();
+    }
+
+    /**
      * Crée une réponse d'erreur
      */
     public static <T> ApiResponse<T> error(String message) {

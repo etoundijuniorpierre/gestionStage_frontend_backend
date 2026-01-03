@@ -3,19 +3,31 @@ package com.internship.management.services;
 import com.internship.management.entities.*;
 import com.internship.management.enums.ConventionState;
 import com.internship.management.enums.OfferStatus;
+import com.internship.management.exception.ResourceNotFoundException;
 import com.internship.management.interfaces.PostOffer;
 import com.internship.management.repositories.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * Implémentation du service de gestion des offres de stage.
+ * 
+ * @author Backend Team
+ * @version 2.0
+ * @since 2026-01-03
+ */
 @Service
 @RequiredArgsConstructor
+@Slf4j
+@Transactional(readOnly = true)
 public class OfferServiceImpl implements PostOffer {
 
     private final OfferRepository offerRepository;
@@ -28,18 +40,21 @@ public class OfferServiceImpl implements PostOffer {
     private final LogoRepository logoRepository;
 
     public Offer getOfferById(Long id) {
+        log.debug("Fetching offer with id: {}", id);
         return offerRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Offer Not Found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Offer", "id", id));
     }
 
+    @Transactional
     public void saveOffer(Offer offer) {
+        log.info("Saving offer: {}", offer.getTitle());
         offerRepository.save(offer);
     }
 
     public Teacher getTeacherByEmail(String email) {
+        log.debug("Fetching teacher with email: {}", email);
         return teacherRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Teacher not found"));
-
+                .orElseThrow(() -> new ResourceNotFoundException("Teacher", "email", email));
     }
 
     public List<Offer> getOfferByDepartmentAndPendingOfferStatusAndInPartnershipTrue(String department,
@@ -54,13 +69,15 @@ public class OfferServiceImpl implements PostOffer {
     }
 
     public Enterprise getByEnterpriseEmail(String email) {
+        log.debug("Fetching enterprise with email: {}", email);
         return enterpriseRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Enterprise Not Found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Enterprise", "email", email));
     }
 
     public Enterprise getByEnterpriseId(Long id) {
+        log.debug("Fetching enterprise with id: {}", id);
         return enterpriseRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Enterprise Not Found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Enterprise", "id", id));
     }
 
     public List<Enterprise> getEnterpriseByPartnershipFalse() {
@@ -94,8 +111,9 @@ public class OfferServiceImpl implements PostOffer {
     }
 
     public Student getStudentByEmail(String email) {
+        log.debug("Fetching student with email: {}", email);
         return studentRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Student Not Found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Student", "email", email));
     }
 
     public List<Student> getStudentsByDepartment(String department) {
@@ -107,7 +125,9 @@ public class OfferServiceImpl implements PostOffer {
         return studentRepository.findByDepartment(department, pageable);
     }
 
+    @Transactional
     public void saveApplication(Application application) {
+        log.info("Saving application for student: {}", application.getStudent().getEmail());
         applicationRepository.save(application);
     }
 
@@ -121,11 +141,14 @@ public class OfferServiceImpl implements PostOffer {
     }
 
     public Application getApplicationById(Long id) {
+        log.debug("Fetching application with id: {}", id);
         return applicationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Application Not Found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Application", "id", id));
     }
 
+    @Transactional
     public void deleteUser(Long id) {
+        log.warn("Deleting user with id: {}", id);
         userRepository.deleteById(id);
     }
 
@@ -139,23 +162,29 @@ public class OfferServiceImpl implements PostOffer {
     }
 
     public Users getUserByEmail(String email) {
+        log.debug("Fetching user with email: {}", email);
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
     }
 
+    @Transactional
     public void saveUser(Users user) {
+        log.info("Saving user: {}", user.getEmail());
         userRepository.save(user);
     }
 
     public Logo getLogoByEnterprise(Enterprise enterprise) {
+        log.debug("Fetching logo for enterprise: {}", enterprise.getId());
         return logoRepository.findByEnterprise(enterprise)
-                .orElseThrow(() -> new RuntimeException("Logo not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Logo", "enterpriseId", enterprise.getId()));
     }
 
+    @Transactional
     public void updateLogo(Long enterpriseId, MultipartFile file) throws IOException {
+        log.info("Updating logo for enterprise: {}", enterpriseId);
 
         Enterprise enterprise = enterpriseRepository.findById(enterpriseId)
-                .orElseThrow(() -> new RuntimeException("Enterprise not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Enterprise", "id", enterpriseId));
 
         Logo logo = logoRepository.findByEnterprise(enterprise)
                 .orElse(new Logo());
@@ -165,11 +194,13 @@ public class OfferServiceImpl implements PostOffer {
         logo.setContentType(file.getContentType());
 
         logoRepository.save(logo);
+        log.debug("Logo updated successfully for enterprise: {}", enterpriseId);
     }
 
     public Convention getConventionByOfferId(Long offerId) {
+        log.debug("Fetching convention for offer: {}", offerId);
         return conventionRepository.findByOffer_Id(offerId)
-                .orElseThrow(() -> new RuntimeException("Convention not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Convention", "offerId", offerId));
     }
 
     public List<Teacher> getAllTeachers() {
@@ -188,7 +219,9 @@ public class OfferServiceImpl implements PostOffer {
         return studentRepository.findAll(pageable);
     }
 
+    @Transactional
     public void saveConvention(Convention convention) {
+        log.info("Saving convention for offer: {}", convention.getOffer().getId());
         conventionRepository.save(convention);
     }
 
@@ -232,7 +265,9 @@ public class OfferServiceImpl implements PostOffer {
         return teacherRepository.findByDepartment(department);
     }
 
+    @Transactional
     public void deleteApplicationRejected(Long id) {
+        log.warn("Deleting rejected application: {}", id);
         applicationRepository.deleteById(id);
     }
 }

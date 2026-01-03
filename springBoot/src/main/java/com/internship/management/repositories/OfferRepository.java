@@ -40,7 +40,7 @@ public interface OfferRepository extends JpaRepository<Offer, Long> {
 
         List<Offer> findByPaying(boolean paying);
 
-        List<Offer> findByRemote(boolean Remote);
+        List<Offer> findByRemote(boolean remote);
 
         List<Offer> findByPayingAndRemote(boolean paying, boolean remote);
 

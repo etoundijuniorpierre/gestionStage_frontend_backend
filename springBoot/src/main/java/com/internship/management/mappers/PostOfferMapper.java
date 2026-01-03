@@ -14,13 +14,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", imports = { java.util.ArrayList.class })
 public interface PostOfferMapper {
 
     Offer toEntity(OfferRequestDto dto);
 
-    @Mapping(target = "convention",  qualifiedByName = "conventionToDto")
-    @Mapping(target = "enterprise",qualifiedByName = "enterpriseToDto")
+    @Mapping(target = "convention", qualifiedByName = "conventionToDto")
+    @Mapping(target = "enterprise", qualifiedByName = "enterpriseToDto")
     OfferResponseDto toDto(Offer offer);
 
     @Named("conventionToDto")
@@ -60,13 +60,13 @@ public interface PostOfferMapper {
         dto.setInPartnership(e.isInPartnership());
         dto.setSectorOfActivity(e.getSectorOfActivity());
 
-         return dto;
+        return dto;
     }
 
     List<OfferResponseDto> toDtoList(List<Offer> offers);
 
-    @Mapping(source = "coverLetter", target = "coverLetter" , qualifiedByName = "multipartToBytes")
-    @Mapping(source = "cv", target = "cv" , qualifiedByName = "multipartToBytes")
+    @Mapping(source = "coverLetter", target = "coverLetter", qualifiedByName = "multipartToBytes")
+    @Mapping(source = "cv", target = "cv", qualifiedByName = "multipartToBytes")
     Application toEntity(ApplicationRequestDto dto);
 
     @Named("multipartToBytes")
@@ -79,13 +79,13 @@ public interface PostOfferMapper {
         }
     }
 
-    @Mapping(target = "student", qualifiedByName = "studentToDto" )
+    @Mapping(target = "student", qualifiedByName = "studentToDto")
     @Mapping(target = "enterprise", qualifiedByName = "entToDto")
     @Mapping(target = "hasFiles", source = "application", qualifiedByName = "isFileExist")
     ApplicationResponseDto toDto(Application application);
 
     @Named("studentToDto")
-    default StudentApplicationDto mapApplicationStudent(Student s){
+    default StudentApplicationDto mapApplicationStudent(Student s) {
 
         StudentApplicationDto dto = new StudentApplicationDto();
         dto.setEmail(s.getEmail());
@@ -121,7 +121,7 @@ public interface PostOfferMapper {
     List<EnterpriseResponseDto> toDtoEnterpriseList(List<Enterprise> enterpriseList);
 
     @Mapping(target = "offers", source = "enterprise", qualifiedByName = "toMiniOfferResponseDtoList")
-    @Mapping(target ="hasLogo", source = "enterprise", qualifiedByName = "toMapHasLogoDto")
+    @Mapping(target = "hasLogo", source = "enterprise", qualifiedByName = "toMapHasLogoDto")
     EnterpriseResponseDto toDtoEnterprise(Enterprise enterprise);
 
     @Named("toMiniOfferResponseDtoList")
@@ -153,9 +153,18 @@ public interface PostOfferMapper {
         hasLogoDto.setHasLogo(e.getLogo() != null);
         return hasLogoDto;
     }
+
+    @Mapping(target = "languages", source = "languages")
     StudentResponseDto toDtoStudent(Student student);
 
     List<StudentResponseDto> toDtoStudentList(List<Student> studentList);
+
+    @Mapping(target = "id", source = "id")
+    @Mapping(target = "name", source = "name")
+    @Mapping(target = "firstName", source = "firstName")
+    @Mapping(target = "email", source = "email")
+    @Mapping(target = "department", source = "department")
+    TeacherResponseDto toDtoTeacher(Teacher teacher);
 
     List<TeacherResponseDto> toDtoTeacherList(List<Teacher> teacherList);
 

@@ -31,7 +31,7 @@ public class Offer {
     private boolean paying;
 
     @Enumerated(EnumType.STRING)
-    private OfferStatus status = OfferStatus.PENDING;;
+    private OfferStatus status = OfferStatus.PENDING;
 
     @ManyToOne
     @JoinColumn(name = "enterprise_id", nullable = false)

@@ -123,7 +123,7 @@ public class StudentController {
     public ResponseEntity<ApiResponse<Void>> deleteApplication(@PathVariable("application_id") Long application_id) {
         log.info("Deleting application with id: {}", application_id);
         postOffer.deleteApplicationRejected(application_id);
-        return ResponseEntity.ok(ApiResponse.success("Application deleted successfully", null));
+        return ResponseEntity.ok(ApiResponse.success("Application deleted successfully", (Void) null));
     }
 
     @Operation(summary = "Créer une nouvelle candidature")
