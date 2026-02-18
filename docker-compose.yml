@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: internship-db
+    environment:
+      POSTGRES_DB: internship
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+    ports:
+      - "2000:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - internship-network
+
+  backend:
+    build:
+      context: ./springBoot
+      dockerfile: Dockerfile
+    container_name: internship-backend
+    ports:
+      - "7070:8080"
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/internship
+      DB_USERNAME: postgres
+      DB_PASSWORD: root
+      JWT_SECRET: a8f0c92b5efb45779a72ef1b8d9d648f7e9c0b4c2038e7b7ff4030201aeccbed
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+    depends_on:
+      - db
+    networks:
+      - internship-network
+
+  frontend:
+    build:
+      context: ./react
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: http://localhost:7070
+    container_name: internship-frontend
+    ports:
+      - "6060:80"
+    depends_on:
+      - backend
+    networks:
+      - internship-network
+
+networks:
+  internship-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

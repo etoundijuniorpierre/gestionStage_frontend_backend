@@ -1,0 +1,10 @@
+/* Prévention du flash blanc lors des transitions */
+body, #root {
+  background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
+  min-height: 100vh;
+}
+
+/* Transition fluide pour les changements de route */
+.route-transition {
+  transition: all 0.3s ease-out;
+}
