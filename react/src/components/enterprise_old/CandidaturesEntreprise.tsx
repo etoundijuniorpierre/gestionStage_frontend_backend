@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getEnterpriseApplications, getEnterpriseOffers, downloadCandidateCV } from '../../api/enterpriseApi';
-import EnterpriseHeader from './EnterpriseHeader';
+import type { OfferResponseDto } from '../../types/offer';
+import EnterpriseHeader from '../EnterpriseHeader';
 interface Application {
   id: number;
   student: {
@@ -28,7 +29,7 @@ interface Application {
 
 const CandidaturesEntreprise: React.FC = () => {
   const [applications, setApplications] = useState<Application[]>([]);
-  const [offers, setOffers] = useState<any[]>([]);
+  const [offers, setOffers] = useState<OfferResponseDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -55,9 +56,9 @@ const CandidaturesEntreprise: React.FC = () => {
         console.log('Candidatures filtrées pour cette entreprise:', filteredApplications);
         console.log('Nombre de candidatures:', filteredApplications.length);
         console.log('Nombre d\'offres:', enterpriseOffers.length);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Erreur lors du chargement:', err);
-        setError(err?.response?.data?.message || 'Erreur lors du chargement des candidatures');
+        setError((err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Erreur lors du chargement des candidatures');
       } finally {
         setLoading(false);
       }
@@ -112,7 +113,7 @@ const CandidaturesEntreprise: React.FC = () => {
               Vous devez d'abord créer une offre de stage pour pouvoir voir les candidatures.
             </p>
             <button
-              onClick={() => navigate('/entreprise/creer-offre')}
+              onClick={() => navigate('/enterprise/creer-offre')}
               className="bg-[#4c7a4c] text-white px-6 py-3 rounded hover:bg-[#6a9a6a] transition-colors"
             >
               Créer une offre
@@ -178,7 +179,7 @@ const CandidaturesEntreprise: React.FC = () => {
                       <div 
                         key={application.id} 
                         className="bg-white rounded-lg p-4 border border-[#d2bfa3] cursor-pointer hover:shadow-lg transition-shadow"
-                        onClick={() => navigate(`/entreprise/candidatures/${application.id}`, { state: { application } })}
+                        onClick={() => navigate(`/enterprise/candidatures/${application.id}`, { state: { application } })}
                       >
                         <div className="flex items-start gap-4">
                           {/* Avatar avec initiales */}

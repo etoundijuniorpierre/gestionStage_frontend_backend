@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { createOffer, addConventionToOffer, getEnterpriseLogo, getEnterpriseOffers, getCurrentEnterpriseInfo } from '../../api/enterpriseApi';
 import type { OfferRequestDto } from '../../types/offer';
-import EnterpriseHeader from './EnterpriseHeader';
+import EnterpriseHeader from '../EnterpriseHeader';
 
 const defaultState: OfferRequestDto = {
   title: '',
@@ -31,7 +31,6 @@ const CreerOffreEntreprise: React.FC = () => {
   const isEditing = !!id;
   const [form, setForm] = useState<OfferRequestDto>(defaultState);
   const [pdfConvention, setPdfConvention] = useState<File | null>(null);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
@@ -58,7 +57,7 @@ const CreerOffreEntreprise: React.FC = () => {
         // Vérifier si l'entreprise est partenaire
         if (enterpriseResponse.data.inPartnership === false) {
           setError('Votre entreprise doit être approuvée comme partenaire pour créer des offres de stage.');
-          setTimeout(() => navigate('/entreprise/offres'), 3000);
+          setTimeout(() => navigate('/enterprise/offres'), 3000);
           return;
         }
         
@@ -87,7 +86,7 @@ const CreerOffreEntreprise: React.FC = () => {
         // Mode édition non supporté - les endpoints getEnterpriseInfo et getOfferById n'existent pas
         if (isEditing && id) {
           setError('La modification d\'offres n\'est pas disponible actuellement');
-          navigate('/entreprise/offres');
+          navigate('/enterprise/offres');
           return;
         }
       } catch (error) {
@@ -112,7 +111,7 @@ const CreerOffreEntreprise: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setForm((prev: OfferRequestDto) => ({ ...prev, [name]: value }));
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -215,7 +214,7 @@ const CreerOffreEntreprise: React.FC = () => {
         } else {
           // Fallback: chercher l'offre par titre (plus fiable)
           const offersResponse = await getEnterpriseOffers();
-          const matchingOffer = offersResponse.data.find(offer => 
+          const matchingOffer = offersResponse.data.find((offer: { title: string; description: string; id?: number }) => 
             offer.title === form.title && 
             offer.description === form.description
           );
@@ -226,10 +225,11 @@ const CreerOffreEntreprise: React.FC = () => {
       }
       
       setSuccess(true);
-      setTimeout(() => navigate('/entreprise/offres'), 2000);
-    } catch (err: any) {
+      setTimeout(() => navigate('/enterprise/offres'), 2000);
+    } catch (err: unknown) {
       // Éviter l'injection de logs - ne pas logger les données utilisateur
-      const errorMessage = err?.response?.data?.message || 'Erreur lors de la création de l\'offre';
+      const axiosErr = err as { response?: { data?: { message?: string } } };
+      const errorMessage = axiosErr.response?.data?.message || 'Erreur lors de la création de l\'offre';
       setError(errorMessage);
     } finally {
       setSubmitting(false);
@@ -301,7 +301,7 @@ const CreerOffreEntreprise: React.FC = () => {
                 <input id="job" name="job" value={form.job} onChange={handleChange} required className="w-full px-2 py-1 rounded border border-gray-300 bg-white mt-1 outline-none" />
               </label>
               <label className="font-medium">Nombre de places
-                <input id="numberOfPlaces" name="numberOfPlaces" type="number" min="1" value={form.numberOfPlaces} onChange={(e) => setForm(prev => ({ ...prev, numberOfPlaces: parseInt(e.target.value) || 1 }))} required className="w-full px-2 py-1 rounded border border-gray-300 bg-white mt-1 outline-none" />
+                <input id="numberOfPlaces" name="numberOfPlaces" type="number" min="1" value={form.numberOfPlaces} onChange={(e) => setForm((prev: OfferRequestDto) => ({ ...prev, numberOfPlaces: parseInt(e.target.value) || 1 }))} required className="w-full px-2 py-1 rounded border border-gray-300 bg-white mt-1 outline-none" />
               </label>
               <div className="flex gap-2">
                 <label className="flex-1 font-medium">Date de debut
@@ -313,10 +313,10 @@ const CreerOffreEntreprise: React.FC = () => {
               </div>
               <div className="flex gap-6">
                 <label className="flex items-center gap-2">
-                  <input type="checkbox" name="paying" checked={form.paying} onChange={(e) => setForm(prev => ({ ...prev, paying: e.target.checked }))} /> Stage payant
+                  <input type="checkbox" name="paying" checked={form.paying} onChange={(e) => setForm((prev: OfferRequestDto) => ({ ...prev, paying: e.target.checked }))} /> Stage payant
                 </label>
                 <label className="flex items-center gap-2">
-                  <input type="checkbox" name="remote" checked={form.remote} onChange={(e) => setForm(prev => ({ ...prev, remote: e.target.checked }))} /> Télétravail
+                  <input type="checkbox" name="remote" checked={form.remote} onChange={(e) => setForm((prev: OfferRequestDto) => ({ ...prev, remote: e.target.checked }))} /> Télétravail
                 </label>
               </div>
               <label className="font-medium">Convention de stage
@@ -357,7 +357,7 @@ const CreerOffreEntreprise: React.FC = () => {
               {success && <div className="text-green-700 text-xs font-medium bg-green-50 border border-green-200 rounded px-3 py-2 mt-2">Votre offre a bien été envoyée !</div>}
               <div className="flex gap-4 mt-4">
                 <button type="button" className="flex-1 bg-gray-200 text-gray-500 border border-gray-300 rounded py-2" disabled>Supprimer l'offre</button>
-                <button type="submit" disabled={loading} className="flex-1 bg-[#4c7a4c] text-white rounded py-2 font-semibold hover:bg-[#6a9a6a] transition-colors disabled:opacity-60 cursor-pointer">
+                <button type="submit" className="flex-1 bg-[#4c7a4c] text-white rounded py-2 font-semibold hover:bg-[#6a9a6a] transition-colors disabled:opacity-60 cursor-pointer">
                   Créer l'offre
                 </button>
               </div>
@@ -520,7 +520,6 @@ const CreerOffreEntreprise: React.FC = () => {
                         <span className="px-2 py-1 bg-[#b79056] text-white text-xs rounded">Payant</span>
                       </div>
                     )}
-                    {console.log('Tags - Domaine:', form.domain, 'Type:', form.typeOfInternship, 'Remote:', form.remote, 'Payant:', form.paying)}
                   </div>
                 </div>
               </div>
@@ -533,3 +532,4 @@ const CreerOffreEntreprise: React.FC = () => {
 };
 
 export default CreerOffreEntreprise;
+

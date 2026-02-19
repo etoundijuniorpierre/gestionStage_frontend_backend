@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { getEnterpriseApplications, downloadCandidateCV, downloadCandidateCoverLetter, validateApplication } from '../../api/enterpriseApi';
-import EnterpriseHeader from './EnterpriseHeader';
+import EnterpriseHeader from '../EnterpriseHeader';
 import ConfirmationModal from '../admin/ConfirmationModal';
 
 interface ApplicationDetail {
   id: number;
   student: {
     firstName: string;
-    lastName: string;
+    name: string;
     email: string;
     department: string;
     languages?: string[];
@@ -45,9 +45,9 @@ const DetailCandidature: React.FC = () => {
     const fetchApplication = async () => {
       try {
         // Récupérer depuis le state de navigation
-        const stateAny = location.state as unknown as { application?: ApplicationDetail } | undefined;
-        if (stateAny && stateAny.application) {
-          setApplication(stateAny.application);
+        const navState = location.state as { application?: ApplicationDetail } | undefined;
+        if (navState && navState.application) {
+          setApplication(navState.application);
           setLoading(false);
           return;
         }
@@ -120,13 +120,13 @@ const DetailCandidature: React.FC = () => {
         type: 'info',
         onConfirm: () => {
           setShowModal(false);
-          navigate('/entreprise/candidatures');
+          navigate('/enterprise/candidatures');
         }
       });
       setShowModal(true);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Erreur lors de la validation:', err);
-      const errorMessage = err?.response?.data?.message || 'Erreur lors de la validation de la candidature';
+      const errorMessage = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Erreur lors de la validation de la candidature';
       setModalConfig({
         title: 'Erreur',
         message: errorMessage,
@@ -169,7 +169,7 @@ const DetailCandidature: React.FC = () => {
           {/* Header avec bouton retour */}
           <div className="flex items-center mb-6">
             <button 
-              onClick={() => navigate('/entreprise/candidatures')}
+              onClick={() => navigate('/enterprise/candidatures')}
               className="mr-4 text-[#2d2d2d] hover:text-[#4c7a4c]"
             >
               <span className="text-2xl">←</span>

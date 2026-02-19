@@ -23,9 +23,9 @@ const StudentDetail: React.FC = () => {
         setLoading(true);
         
         // Récupérer depuis le state de navigation
-        const stateAny = location.state as unknown as { student?: StudentResponseDto } | undefined;
-        if (stateAny && stateAny.student) {
-          setStudent(stateAny.student);
+        const navState = location.state as { student?: StudentResponseDto } | undefined;
+        if (navState && navState.student) {
+          setStudent(navState.student);
           setLoading(false);
           return;
         }
@@ -114,13 +114,13 @@ const StudentDetail: React.FC = () => {
                       )}
                       
                       {/* Liens sociaux */}
-                      {((student as any).githubLink || (student as any).linkedinLink) && (
+                      {(student.githubLink || student.linkedinLink) && (
                         <div className="mt-4">
                           <h3 className="text-md font-semibold mb-2">Liens professionnels</h3>
                           <div className="flex gap-4">
-                            {(student as any).githubLink && (
+                            {student.githubLink && (
                               <a 
-                                href={(student as any).githubLink} 
+                                href={student.githubLink} 
                                 target="_blank" 
                                 rel="noopener noreferrer"
                                 className="flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors"
@@ -128,9 +128,9 @@ const StudentDetail: React.FC = () => {
                                 <span>🐈</span> GitHub
                               </a>
                             )}
-                            {(student as any).linkedinLink && (
+                            {student.linkedinLink && (
                               <a 
-                                href={(student as any).linkedinLink} 
+                                href={student.linkedinLink} 
                                 target="_blank" 
                                 rel="noopener noreferrer"
                                 className="flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors"

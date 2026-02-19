@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { createOffer, addConventionToOffer, getEnterpriseLogo, getEnterpriseOffers, getCurrentEnterpriseInfo } from '../api/enterpriseApi';
-import type { OfferRequestDto } from '../types/offer';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { createOffer, addConventionToOffer, getEnterpriseLogo, getEnterpriseOffers, getCurrentEnterpriseInfo } from '../../api/enterpriseApi';
+import type { OfferRequestDto } from '../../types/offer';
 import EnterpriseHeader from './EnterpriseHeader';
 
 const defaultState: OfferRequestDto = {
@@ -31,7 +31,6 @@ const CreerOffreEntreprise: React.FC = () => {
   const isEditing = !!id;
   const [form, setForm] = useState<OfferRequestDto>(defaultState);
   const [pdfConvention, setPdfConvention] = useState<File | null>(null);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
@@ -44,6 +43,8 @@ const CreerOffreEntreprise: React.FC = () => {
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
 
   const navigate = useNavigate();
+  const location = useLocation();
+  console.log('Location state:', location.state);
 
   React.useEffect(() => {
     const fetchData = async () => {
@@ -80,7 +81,7 @@ const CreerOffreEntreprise: React.FC = () => {
         // Mode édition non supporté - les endpoints getEnterpriseInfo et getOfferById n'existent pas
         if (isEditing && id) {
           setError('La modification d\'offres n\'est pas disponible actuellement');
-          navigate('/entreprise/offres');
+          navigate('/enterprise/offres');
           return;
         }
       } catch (error) {
@@ -105,7 +106,7 @@ const CreerOffreEntreprise: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setForm((prev: OfferRequestDto) => ({ ...prev, [name]: value }));
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -208,7 +209,7 @@ const CreerOffreEntreprise: React.FC = () => {
         } else {
           // Fallback: chercher l'offre par titre (plus fiable)
           const offersResponse = await getEnterpriseOffers();
-          const matchingOffer = offersResponse.data.find(offer => 
+          const matchingOffer = offersResponse.data.find((offer: { title: string; description: string; id?: number }) => 
             offer.title === form.title && 
             offer.description === form.description
           );
@@ -219,10 +220,10 @@ const CreerOffreEntreprise: React.FC = () => {
       }
       
       setSuccess(true);
-      setTimeout(() => navigate('/entreprise/offres'), 2000);
-    } catch (err: any) {
+      setTimeout(() => navigate('/enterprise/offres'), 2000);
+    } catch (err: unknown) {
       // Éviter l'injection de logs - ne pas logger les données utilisateur
-      const errorMessage = err?.response?.data?.message || 'Erreur lors de la création de l\'offre';
+      const errorMessage = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Erreur lors de la création de l\'offre';
       setError(errorMessage);
     } finally {
       setSubmitting(false);
@@ -304,10 +305,10 @@ const CreerOffreEntreprise: React.FC = () => {
               </div>
               <div className="flex gap-6">
                 <label className="flex items-center gap-2">
-                  <input type="checkbox" name="paying" checked={form.paying} onChange={(e) => setForm(prev => ({ ...prev, paying: e.target.checked }))} /> Stage payant
+                  <input type="checkbox" name="paying" checked={form.paying} onChange={(e) => setForm((prev: OfferRequestDto) => ({ ...prev, paying: e.target.checked }))} /> Stage payant
                 </label>
                 <label className="flex items-center gap-2">
-                  <input type="checkbox" name="remote" checked={form.remote} onChange={(e) => setForm(prev => ({ ...prev, remote: e.target.checked }))} /> Télétravail
+                  <input type="checkbox" name="remote" checked={form.remote} onChange={(e) => setForm((prev: OfferRequestDto) => ({ ...prev, remote: e.target.checked }))} /> Télétravail
                 </label>
               </div>
               <label className="font-medium">Convention de stage
@@ -348,7 +349,7 @@ const CreerOffreEntreprise: React.FC = () => {
               {success && <div className="text-green-700 text-xs font-medium bg-green-50 border border-green-200 rounded px-3 py-2 mt-2">Votre offre a bien été envoyée !</div>}
               <div className="flex gap-4 mt-4">
                 <button type="button" className="flex-1 bg-gray-200 text-gray-500 border border-gray-300 rounded py-2" disabled>Supprimer l'offre</button>
-                <button type="submit" disabled={loading} className="flex-1 bg-[#4c7a4c] text-white rounded py-2 font-semibold hover:bg-[#6a9a6a] transition-colors disabled:opacity-60 cursor-pointer">
+                <button type="submit" className="flex-1 bg-[#4c7a4c] text-white rounded py-2 font-semibold hover:bg-[#6a9a6a] transition-colors disabled:opacity-60 cursor-pointer">
                   Créer l'offre
                 </button>
               </div>
@@ -403,16 +404,12 @@ const CreerOffreEntreprise: React.FC = () => {
                   ×
                 </button>
               </div>
-              {console.log('=== RENDU APERÇU ===')}
-              {console.log('Form dans le rendu:', form)}
-              {console.log('ShowPreview:', showPreview)}
               
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Colonne principale */}
                 <div className="lg:col-span-2 space-y-6">
                   {/* Titre */}
                   <h3 className="text-2xl font-bold text-[#2d2d2d]">{form.title}</h3>
-                  {console.log('Titre affiché:', form.title)}
 
                   {/* Résumé */}
                   <div>
@@ -423,7 +420,6 @@ const CreerOffreEntreprise: React.FC = () => {
                       <div><span className="font-medium">Stage payant:</span> {form.paying ? 'OUI' : 'NON'}</div>
                       <div><span className="font-medium">Télétravail:</span> {form.remote ? 'OUI' : 'NON'}</div>
                       <div><span className="font-medium">Période du stage:</span> {formatDate(form.startDate)} - {formatDate(form.endDate)}</div>
-                      {console.log('Type:', form.typeOfInternship, 'Job:', form.job, 'Paying:', form.paying, 'Remote:', form.remote)}
                     </div>
                     <div className="flex gap-2 mt-3">
                       {form.paying && (
@@ -437,7 +433,6 @@ const CreerOffreEntreprise: React.FC = () => {
                   <div>
                     <h4 className="text-lg font-semibold text-[#2d2d2d] mb-3">Description de la mission</h4>
                     <p className="text-sm text-[#2d2d2d]">{form.description}</p>
-                    {console.log('Description:', form.description)}
                   </div>
 
                   {/* Convention */}
@@ -445,7 +440,6 @@ const CreerOffreEntreprise: React.FC = () => {
                     <h4 className="text-lg font-semibold text-[#2d2d2d] mb-3">Convention de stage</h4>
                     <div className="text-sm text-[#2d2d2d]">
                       Fichier: {pdfConvention?.name || 'Aucun fichier sélectionné'}
-                      {console.log('PDF Convention:', pdfConvention?.name)}
                     </div>
                   </div>
 
@@ -453,7 +447,6 @@ const CreerOffreEntreprise: React.FC = () => {
                   <div>
                     <h4 className="text-lg font-semibold text-[#2d2d2d] mb-3">Exigences</h4>
                     <p className="text-sm text-[#2d2d2d]">{form.requirements}</p>
-                    {console.log('Exigences:', form.requirements)}
                   </div>
 
                   {/* Boutons d'action */}
@@ -493,7 +486,6 @@ const CreerOffreEntreprise: React.FC = () => {
                       )}
                     </div>
                     <h4 className="font-semibold text-[#2d2d2d] mb-1">{enterpriseInfo?.name || 'Entreprise'}</h4>
-                    {console.log('Enterprise info dans aperçu:', enterpriseInfo)}
                     <div className="text-xs text-[#2d2d2d] space-y-1">
                       <div>{enterpriseInfo?.location || 'Localisation'}</div>
                       <div>{enterpriseInfo?.sectorOfActivity || 'Secteur'}</div>
@@ -504,7 +496,6 @@ const CreerOffreEntreprise: React.FC = () => {
                   <div className="space-y-3 text-sm text-[#2d2d2d]">
                     <div><span className="font-medium">Nombre de places:</span> {form.numberOfPlaces || '1'}</div>
                     <div><span className="font-medium">Domaine:</span> {form.domain}</div>
-                    {console.log('Nombre de places:', form.numberOfPlaces, 'Domaine:', form.domain)}
                   </div>
 
                   {/* Tags */}
@@ -521,7 +512,6 @@ const CreerOffreEntreprise: React.FC = () => {
                         <span className="px-2 py-1 bg-[#b79056] text-white text-xs rounded">Payant</span>
                       </div>
                     )}
-                    {console.log('Tags - Domaine:', form.domain, 'Type:', form.typeOfInternship, 'Remote:', form.remote, 'Payant:', form.paying)}
                   </div>
                 </div>
               </div>
@@ -534,3 +524,4 @@ const CreerOffreEntreprise: React.FC = () => {
 };
 
 export default CreerOffreEntreprise;
+

@@ -3,22 +3,8 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import AdminHeader from './AdminHeader';
 import { approveEnterprise, deleteEnterprise } from '../../api/adminApi';
 import { getEnterpriseById } from '../../api/enterpriseApi';
-import type { EnterpriseResponseDto } from '../../types/enterprise';
+import type { EnterpriseResponseDto, offersResponseDto } from '../../types/enterprise';
 import ConfirmationModal from './ConfirmationModal';
-
-interface OfferInEnterprise {
-  id: number;
-  title: string;
-  description: string;
-  domain: string;
-  job: string;
-  typeOfInternship?: string;
-  startDate: string;
-  endDate: string;
-  numberOfPlaces?: number;
-  paying?: boolean;
-  remote?: boolean;
-}
 
 const EnterpriseDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -40,9 +26,9 @@ const EnterpriseDetail: React.FC = () => {
         setLoading(true);
 
         // 1) Premier essai: récupérer depuis le state de navigation
-        const stateAny = location.state as unknown as { enterprise?: EnterpriseResponseDto } | undefined;
-        if (stateAny && stateAny.enterprise) {
-          setEnterprise(stateAny.enterprise);
+        const navState = location.state as { enterprise?: EnterpriseResponseDto } | undefined;
+        if (navState && navState.enterprise) {
+          setEnterprise(navState.enterprise);
           return;
         }
 
@@ -199,7 +185,7 @@ const EnterpriseDetail: React.FC = () => {
                 <div className="bg-white rounded-lg shadow-md p-6 mb-6">
                   <h2 className="text-xl font-semibold mb-4">Offres de stage ({enterprise.offers.length})</h2>
                   <div className="flex flex-col gap-4">
-                    {enterprise.offers.map((offer: any) => (
+                    {enterprise.offers.map((offer: offersResponseDto) => (
                       <div
                         key={offer.id}
                         className="flex flex-row items-stretch bg-[var(--color-light)] rounded-xl shadow-lg border border-[#e1d3c1] overflow-hidden hover:bg-[var(--color-light)] transition-colors cursor-pointer"

@@ -3,8 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { getStageDetail, downloadConvention, submitApplication } from "../api/stageApi";
 import type { OfferResponseDto } from '../types/offer';
-import EtudiantHeader from './EtudiantHeader';
-import EnterpriseLogo from './entreprise/EnterpriseLogo';
+import StudentHeader from './student/StudentHeader';
+import EnterpriseLogo from './enterprise/EnterpriseLogo';
 import { useStudentStatus } from '../hooks/useStudentStatus';
 import { validateApplicationEligibility, getApplicationButtonText, isApplicationButtonDisabled } from '../utils/applicationUtils';
 import ConfirmationModal from './admin/ConfirmationModal';
@@ -87,7 +87,7 @@ const StageDetail: React.FC = () => {
     if (!validation.canApply) {
       setModalConfig({
         title: 'Candidature impossible',
-        message: validation.message,
+        message: validation.message || '',
         type: 'warning'
       });
       setShowModal(true);
@@ -152,13 +152,14 @@ const StageDetail: React.FC = () => {
         setSubmitSuccess(false);
         navigate('/etudiant/mon-stage');
       }, 2000);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as { response?: { status?: number; data?: { message?: string } }; message?: string };
       console.error('Erreur lors de la soumission:', error);
-      console.error('Status:', error?.response?.status);
-      console.error('Message:', error?.response?.data?.message);
+      console.error('Status:', err?.response?.status);
+      console.error('Message:', err?.response?.data?.message);
       
       // Gestion d'erreurs spécifiques
-      if (error?.response?.status === 409 || error?.response?.status === 400 || error?.message?.includes('already applied') || error?.response?.data?.message?.includes('déjà candidaté') || error?.response?.data?.message?.includes('already applied')) {
+      if (err?.response?.status === 409 || err?.response?.status === 400 || err?.message?.includes('already applied') || err?.response?.data?.message?.includes('déjà candidaté') || err?.response?.data?.message?.includes('already applied')) {
         setModalConfig({
           title: 'Candidature impossible',
           message: 'Vous avez déjà candidaté à cette offre. Impossible de candidater 2 fois.',
@@ -167,7 +168,7 @@ const StageDetail: React.FC = () => {
         setShowModal(true);
         await studentStatus.refresh();
         setShowCandidatureForm(false);
-      } else if (error?.response?.status === 403) {
+      } else if (err?.response?.status === 403) {
         setModalConfig({
           title: 'Candidature impossible',
           message: 'Vous ne pouvez plus candidater car vous êtes déjà en stage.',
@@ -179,7 +180,7 @@ const StageDetail: React.FC = () => {
       } else {
         setModalConfig({
           title: 'Erreur',
-          message: error?.response?.data?.message || 'Erreur lors de la soumission de votre candidature.',
+          message: err?.response?.data?.message || 'Erreur lors de la soumission de votre candidature.',
           type: 'danger'
         });
         setShowModal(true);
@@ -191,7 +192,7 @@ const StageDetail: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-login-gradient flex flex-col">
-      <EtudiantHeader />
+      <StudentHeader />
       <div className="flex flex-col items-center w-full mt-8 mb-2 px-4">
         <div className="w-full max-w-[950px]">
           <div className="w-full bg-[var(--color-light)] shadow-xl p-8 border border-[#e1d3c1] relative rounded-lg">

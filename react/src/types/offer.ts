@@ -27,6 +27,11 @@ export interface OfferRequestDto {
   remote: boolean;
 }
 
+export interface ConventionResponseDto {
+  state: string;
+  hasFile: boolean;
+}
+
 export interface OfferResponseDto {
   id: number;
   title: string;
@@ -43,5 +48,5 @@ export interface OfferResponseDto {
   paying: boolean;
   remote: boolean;
   enterprise: EnterpriseOfferResponseDto;
-  convention?: any;
+  convention?: ConventionResponseDto;
 }

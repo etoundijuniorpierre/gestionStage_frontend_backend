@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import TeacherHeader from './TeacherHeader';
-import { getEnterpriseInPartnership } from '../../api/teacherApi';
+import { getTeacherEnterpriseInPartnership } from '../../api/teacherApi';
 import type { EnterpriseResponseDto } from '../../types/enterprise';
-import EnterpriseLogo from '../entreprise/EnterpriseLogo';
+import EnterpriseLogo from '../enterprise/EnterpriseLogo';
 
 const EntreprisesList: React.FC = () => {
   const navigate = useNavigate();
@@ -17,7 +17,7 @@ const EntreprisesList: React.FC = () => {
     const fetchEnterprises = async () => {
       try {
         setLoading(true);
-        const response = await getEnterpriseInPartnership();
+        const response = await getTeacherEnterpriseInPartnership();
         const enterprises = response.data || [];
         setPartnerEnterprises(enterprises);
         

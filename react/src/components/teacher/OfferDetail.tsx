@@ -3,10 +3,12 @@ import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import TeacherHeader from './TeacherHeader';
 import AdminHeader from '../admin/AdminHeader';
-import { getOffersToReviewByDepartment, validateOfferAndConvention, downloadConvention } from '../../api/teacherApi';
+import { getOffersToReviewByDepartment, validateOfferAndConvention } from '../../api/teacherApi';
+import { downloadConvention } from '../../api/offerDetailApi';
 import { useLocation } from 'react-router-dom';
-import EnterpriseLogo from '../entreprise/EnterpriseLogo';
+import EnterpriseLogo from '../enterprise/EnterpriseLogo';
 import type { OfferResponseDto } from '../../types/offer';
+import type { ApplicationResponseDto } from '../../types/application';
 
 const TeacherOfferDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -16,7 +18,7 @@ const TeacherOfferDetail = () => {
   const [loading, setLoading] = useState(true);
   const [showApplications, setShowApplications] = useState(false);
   const [processingAction, setProcessingAction] = useState(false);
-  const applications: any[] = [];
+  const applications: ApplicationResponseDto[] = [];
   
   const isAdminRoute = location.pathname.startsWith('/admin');
 
@@ -62,9 +64,10 @@ const TeacherOfferDetail = () => {
       setOffer({ ...offer, status: 'APPROVED' });
       console.log('Offre approuvée avec succès');
       setTimeout(() => navigate(isAdminRoute ? '/admin/offres' : '/enseignant/offres'), 1000);
-    } catch (error: any) {
-      console.error('Erreur:', error);
-      console.error(error.message || 'Erreur lors de l\'approbation');
+    } catch (error: unknown) {
+      const err = error as { response?: { status?: number; data?: { message?: string } }; message?: string };
+      console.error('Erreur:', err);
+      console.error(err.message || 'Erreur lors de l\'approbation');
     } finally {
       setProcessingAction(false);
     }
@@ -82,9 +85,10 @@ const TeacherOfferDetail = () => {
       setOffer({ ...offer, status: 'REJECTED' });
       console.log('Offre refusée');
       setTimeout(() => navigate(isAdminRoute ? '/admin/offres' : '/enseignant/offres'), 1000);
-    } catch (error: any) {
-      console.error('Erreur:', error);
-      console.error(error.message || 'Erreur lors du refus');
+    } catch (error: unknown) {
+      const err = error as { response?: { status?: number; data?: { message?: string } }; message?: string };
+      console.error('Erreur:', err);
+      console.error(err.message || 'Erreur lors du refus');
     } finally {
       setProcessingAction(false);
     }
@@ -112,11 +116,11 @@ const TeacherOfferDetail = () => {
   };
 
   // Note: Les enseignants ne gèrent pas les candidatures - c'est le rôle des entreprises
-  const handleAcceptApplication = async (applicationId: number) => {
+  const handleAcceptApplication = async () => {
     console.log('Les candidatures sont gérées par les entreprises, pas les enseignants.');
   };
   
-  const handleRejectApplication = async (applicationId: number) => {
+  const handleRejectApplication = async () => {
     console.log('Les candidatures sont gérées par les entreprises, pas les enseignants.');
   };
 
@@ -316,41 +320,40 @@ const TeacherOfferDetail = () => {
                           className="bg-white/80 p-4 rounded-lg flex justify-between items-center"
                         >
                           <div>
-                            <div className="font-semibold text-[var(--color-dark)]">{app.studentName}</div>
-                            <div className="text-sm text-gray-600">{app.studentEmail}</div>
-                            <div className="text-xs text-gray-500 mt-1">Soumis le {app.submittedAt}</div>
+                            <div className="font-semibold text-[var(--color-dark)]">{app.student.firstName} {app.student.name}</div>
+                            <div className="text-sm text-gray-600">{app.student.email}</div>
                           </div>
                           <div className="flex gap-2">
-                            {app.cvUrl && (
+                            {app.hasFiles.hasCV && (
                               <button className="text-sm bg-[var(--color-vert)] text-white px-3 py-1 rounded hover:bg-[#6b7d4b] transition">
                                 CV
                               </button>
                             )}
-                            {app.coverLetterUrl && (
+                            {app.hasFiles.hasCoverLetter && (
                               <button className="text-sm bg-[var(--color-vert)] text-white px-3 py-1 rounded hover:bg-[#6b7d4b] transition">
                                 Lettre
                               </button>
                             )}
-                            {app.status === 'PENDING' && (
+                            {app.state === 'PENDING' && (
                               <>
-                                <button 
-                                  onClick={() => handleAcceptApplication(app.id)}
-                                  className="text-sm bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 transition"
-                                >
-                                  Accepter
-                                </button>
-                                <button 
-                                  onClick={() => handleRejectApplication(app.id)}
-                                  className="text-sm bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition"
-                                >
-                                  Refuser
-                                </button>
+                                  <button 
+                                    onClick={() => handleAcceptApplication()}
+                                    className="text-sm bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 transition"
+                                  >
+                                    Accepter
+                                  </button>
+                                  <button 
+                                    onClick={() => handleRejectApplication()}
+                                    className="text-sm bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition"
+                                  >
+                                    Refuser
+                                  </button>
                               </>
                             )}
-                            {app.status === 'ACCEPTED' && (
+                            {app.state === 'ACCEPTED' && (
                               <span className="text-sm px-3 py-1 rounded bg-green-100 text-green-800">Accepté</span>
                             )}
-                            {app.status === 'REJECTED' && (
+                            {app.state === 'REJECTED' && (
                               <span className="text-sm px-3 py-1 rounded bg-red-100 text-red-800">Refusé</span>
                             )}
                           </div>
@@ -369,3 +372,4 @@ const TeacherOfferDetail = () => {
 };
 
 export default TeacherOfferDetail;
+

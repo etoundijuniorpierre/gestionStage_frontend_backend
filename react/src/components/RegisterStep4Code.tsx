@@ -1,7 +1,6 @@
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { verifyEmail, resendToken } from '../api/registrationApi';
-import { useAuthStore } from '../store/authStore';
 import { useRegistrationStore } from '../store/registrationStore';
 
 const CODE_LENGTH = 5;
@@ -13,7 +12,7 @@ interface RegisterStep4CodeProps {
   onCancel?: () => void;
 }
 
-const RegisterStep4Code = ({ email, accountType, onSuccess, onCancel }: RegisterStep4CodeProps) => {
+const RegisterStep4Code = ({ email }: RegisterStep4CodeProps) => {
   const { setStep, reset } = useRegistrationStore();
 
   const [code, setCode] = useState<string[]>(Array(CODE_LENGTH).fill(''));

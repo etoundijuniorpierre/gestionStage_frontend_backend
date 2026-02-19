@@ -9,6 +9,8 @@ import java.util.List;
 public interface StudentService {
     Student getStudentByEmail(String email);
 
+    Student getStudentById(Long id);
+
     List<Student> getStudentsByDepartment(String department);
 
     List<Student> getAllStudents();

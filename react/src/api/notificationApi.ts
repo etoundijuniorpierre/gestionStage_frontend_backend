@@ -6,11 +6,12 @@ export const getUnseenNotifications = async () => {
     return await api.get('/getNotifications/getUnseenNotifications', {
       headers: getAuthHeaders()
     });
-  } catch (error: any) {
-    if (error.response?.status === 401) {
+  } catch (error: unknown) {
+      const err = error as { response?: { status?: number; data?: { message?: string } }; message?: string };
+    if (err.response?.status === 401) {
       throw new Error('Session expirée. Veuillez vous reconnecter.');
     }
-    throw new Error(error.response?.data?.message || 'Erreur lors de la récupération des notifications');
+    throw new Error(err.response?.data?.message || 'Erreur lors de la récupération des notifications');
   }
 };
 
@@ -20,11 +21,12 @@ export const markNotificationAsSeen = async (notificationId: number) => {
     return await api.put(`/getNotifications/userNotifications/${notificationId}/seen`, {}, {
       headers: getAuthHeaders()
     });
-  } catch (error: any) {
-    if (error.response?.status === 401) {
+  } catch (error: unknown) {
+      const err = error as { response?: { status?: number; data?: { message?: string } }; message?: string };
+    if (err.response?.status === 401) {
       throw new Error('Session expirée. Veuillez vous reconnecter.');
     }
-    throw new Error(error.response?.data?.message || 'Erreur lors du marquage de la notification');
+    throw new Error(err.response?.data?.message || 'Erreur lors du marquage de la notification');
   }
 };
 
@@ -40,11 +42,12 @@ export const getNotificationsByRole = async (role: 'student' | 'teacher' | 'ente
     return await api.get(endpoints[role], {
       headers: getAuthHeaders()
     });
-  } catch (error: any) {
-    if (error.response?.status === 401) {
+  } catch (error: unknown) {
+      const err = error as { response?: { status?: number; data?: { message?: string } }; message?: string };
+    if (err.response?.status === 401) {
       throw new Error('Session expirée. Veuillez vous reconnecter.');
     }
-    throw new Error(error.response?.data?.message || 'Erreur lors de la récupération des notifications');
+    throw new Error(err.response?.data?.message || 'Erreur lors de la récupération des notifications');
   }
 };
 

@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { getEnterpriseOffers, getEnterpriseApplications, getCurrentEnterpriseInfo } from '../../api/enterpriseApi';
 import { useApplicationsStore } from '../../store/applicationsStore';
 import type { OfferResponseDto } from '../../types/offer';
-import EntrepriseHeader from './EnterpriseHeader';
+import EntrepriseHeader from '../EnterpriseHeader';
 import OfferCard from '../OfferCard';
 import ConfirmationModal from '../admin/ConfirmationModal';
 
@@ -51,7 +51,7 @@ const ListeOffresEntreprise: React.FC = () => {
         // Compter les candidatures par offre
         const applicationsData = applicationsResponse.data || [];
         const counts: Record<number, number> = {};
-        applicationsData.forEach((app: any) => {
+        applicationsData.forEach((app: { offer?: { id?: number } }) => {
           const offerId = app.offer?.id;
           if (offerId) {
             counts[offerId] = (counts[offerId] || 0) + 1;
@@ -63,7 +63,8 @@ const ListeOffresEntreprise: React.FC = () => {
           setApplicationsCount(parseInt(offerId), count);
         });
         
-      } catch (error) {
+      } catch (err) {
+        console.error('Erreur lors du chargement des offres:', err);
         setOffers([]);
         setPartnershipLoading(false);
       } finally {
@@ -86,7 +87,7 @@ const ListeOffresEntreprise: React.FC = () => {
       setShowPartnerModal(true);
       return;
     }
-    navigate('/entreprise/creer-offre');
+    navigate('/enterprise/creer-offre');
   };
 
   // Recherche sur le titre ou le domaine
@@ -176,7 +177,7 @@ const ListeOffresEntreprise: React.FC = () => {
                 <OfferCard
                   key={offer.id}
                   offer={offer}
-                  onClick={() => navigate(`/entreprise/offres/${offer.id}`)}
+                  onClick={() => navigate(`/enterprise/offres/${offer.id}`)}
                 />
               ))}
             </div>

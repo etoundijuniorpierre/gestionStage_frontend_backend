@@ -5,13 +5,13 @@ import NotificationBell from '../NotificationBell';
 import { useAuthStore } from '../../store/authStore';
 
 const navLinks = [
-  { to: '/entreprise/offres', label: 'Listes des offres' },
-  { to: '/entreprise/candidatures', label: 'Candidatures' },
+  { to: '/enterprise/offres', label: 'Listes des offres' },
+  { to: '/enterprise/candidatures', label: 'Candidatures' },
 ];
 
 const rightLinks = [
-  { to: '/entreprise/profil', label: 'Profil entreprise' },
-  { to: '/entreprise/parametres', label: 'Paramètre' },
+  { to: '/enterprise/profil', label: 'Profil entreprise' },
+  { to: '/enterprise/parametres', label: 'Paramètre' },
 ];
 
 export default function EntrepriseHeader() {

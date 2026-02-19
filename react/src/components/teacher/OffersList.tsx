@@ -4,16 +4,29 @@ import TeacherHeader from './TeacherHeader';
 import { getOffersToReviewByDepartment } from '../../api/teacherApi';
 import TeacherOfferCard from './TeacherOfferCard';
 import type { OfferResponseDto } from '../../types/offer';
+import {
+  OfferStatus,
+  LocationFilter,
+  PayingFilter,
+  InternshipTypeFilter,
+  LOCATION_FILTER_OPTIONS,
+  PAYING_FILTER_OPTIONS,
+  INTERNSHIP_TYPE_FILTER_OPTIONS,
+  type OfferStatusFilter,
+  type LocationFilterType,
+  type PayingFilterType,
+  type InternshipTypeFilterType,
+} from '../../constants/offerConstants';
 
 export default function OffersList() {
   const navigate = useNavigate();
   const [offers, setOffers] = useState<OfferResponseDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED'>('ALL');
-  const [locationFilter, setLocationFilter] = useState<'ALL' | 'REMOTE' | 'ONSITE'>('ALL');
-  const [payingFilter, setPayingFilter] = useState<'ALL' | 'PAYING' | 'NON_PAYING'>('ALL');
-  const [typeFilter, setTypeFilter] = useState<'ALL' | 'Initiation' | 'Perfectionnement' | 'Pré-emploi'>('ALL');
+  const [statusFilter] = useState<OfferStatusFilter>(OfferStatus.ALL);
+  const [locationFilter, setLocationFilter] = useState<LocationFilterType>(LocationFilter.ALL);
+  const [payingFilter, setPayingFilter] = useState<PayingFilterType>(PayingFilter.ALL);
+  const [typeFilter, setTypeFilter] = useState<InternshipTypeFilterType>(InternshipTypeFilter.ALL);
 
   useEffect(() => {
     const fetchOffers = async () => {
@@ -33,49 +46,28 @@ export default function OffersList() {
     };
 
     fetchOffers();
-    
+
     // Recharger les offres quand on revient sur la page
     const handleFocus = () => fetchOffers();
     window.addEventListener('focus', handleFocus);
-    
+
     return () => window.removeEventListener('focus', handleFocus);
   }, []);
 
   const filteredOffers = offers.filter(offer => {
     const matchesSearch = offer.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (offer.enterprise?.name || '').toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'ALL' || offer.status === statusFilter;
-    const matchesLocation = locationFilter === 'ALL' || 
-      (locationFilter === 'REMOTE' && offer.remote) ||
-      (locationFilter === 'ONSITE' && !offer.remote);
-    const matchesPaying = payingFilter === 'ALL' ||
-      (payingFilter === 'PAYING' && offer.paying) ||
-      (payingFilter === 'NON_PAYING' && !offer.paying);
-    const matchesType = typeFilter === 'ALL' || offer.typeOfInternship === typeFilter;
+    const matchesStatus = statusFilter === OfferStatus.ALL || offer.status === statusFilter;
+    const matchesLocation = locationFilter === LocationFilter.ALL ||
+      (locationFilter === LocationFilter.REMOTE && offer.remote) ||
+      (locationFilter === LocationFilter.ONSITE && !offer.remote);
+    const matchesPaying = payingFilter === PayingFilter.ALL ||
+      (payingFilter === PayingFilter.PAYING && offer.paying) ||
+      (payingFilter === PayingFilter.NON_PAYING && !offer.paying);
+    const matchesType = typeFilter === InternshipTypeFilter.ALL || offer.typeOfInternship === typeFilter;
     return matchesSearch && matchesStatus && matchesLocation && matchesPaying && matchesType;
   });
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'PENDING':
-        return 'px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200';
-      case 'APPROVED':
-        return 'px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200';
-      case 'REJECTED':
-        return 'px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200';
-      default:
-        return 'px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200';
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'PENDING': return 'En attente';
-      case 'APPROVED': return 'Approuvé';
-      case 'REJECTED': return 'Refusé';
-      default: return status;
-    }
-  };
 
   return (
     <div className="min-h-screen bg-login-gradient flex flex-col gap-5">
@@ -85,31 +77,22 @@ export default function OffersList() {
         <aside className="hidden md:flex flex-col items-start min-w-[210px] max-w-[260px] mr-4 rounded-xl shadow-lg px-7 py-8 gap-6">
           <div className="flex items-center gap-2 mb-4">
             <span className="text-[var(--color-neutre9)] text-base">Filter</span>
-            {/* <label className="inline-flex relative items-center cursor-pointer ml-2">
-              <input type="checkbox" className="sr-only peer" disabled />
-              <div className="w-7 h-3 bg-gray-200 rounded-full peer peer-focus:ring-1 peer-focus:ring-[#b79056] dark:bg-gray-700 peer-checked:bg-[#b79056] after:content-[''] after:absolute after:top-0.8 after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-full peer-checked:after:border-[#b79056]" />
-            </label> */}
           </div>
-          
+
           {/* Filtre par statut */}
           {/* <div className="mb-4">
             <div className="text-xs text-[var(--color-neutre9)] font-semibold mb-2">Statut</div>
             <div className="flex flex-col gap-1">
-              {[
-                { key: 'ALL', label: 'Toutes' },
-                { key: 'PENDING', label: 'En attente' },
-                { key: 'APPROVED', label: 'Approuvées' },
-                { key: 'REJECTED', label: 'Refusées' }
-              ].map(({ key, label }) => (
+              {(Object.values(OfferStatus) as OfferStatusFilter[]).map((key) => (
                 <label key={key} className="flex items-center gap-2 text-xs text-[var(--color-neutre9)]">
-                  <input 
-                    type="radio" 
-                    name="status" 
+                  <input
+                    type="radio"
+                    name="status"
                     checked={statusFilter === key}
-                    onChange={() => setStatusFilter(key as any)}
-                    className="accent-[#b79056]" 
+                    onChange={() => setStatusFilter(key)}
+                    className="accent-[#b79056]"
                   />
-                  {label}
+                  {OFFER_STATUS_LABELS[key]}
                 </label>
               ))}
             </div>
@@ -118,61 +101,50 @@ export default function OffersList() {
           <div className="mb-4">
             <div className="text-xs text-[var(--color-neutre9)] font-semibold mb-2">Location</div>
             <div className="flex flex-col gap-1">
-              {[
-                { key: 'ALL', label: 'Toutes' },
-                { key: 'REMOTE', label: 'En remote' },
-                { key: 'ONSITE', label: 'Sur site' }
-              ].map(({ key, label }) => (
+              {LOCATION_FILTER_OPTIONS.map(({ key, label }) => (
                 <label key={key} className="flex items-center gap-2 text-xs text-[var(--color-neutre9)]">
-                  <input 
-                    type="radio" 
-                    name="location" 
+                  <input
+                    type="radio"
+                    name="location"
                     checked={locationFilter === key}
-                    onChange={() => setLocationFilter(key as any)}
-                    className="accent-[#b79056]" 
+                    onChange={() => setLocationFilter(key)}
+                    className="accent-[#b79056]"
                   />
                   {label}
                 </label>
               ))}
             </div>
           </div>
+
           <div className="mb-4">
             <div className="text-xs text-[var(--color-neutre9)] font-semibold mb-2">Payant</div>
             <div className="flex flex-col gap-1">
-              {[
-                { key: 'ALL', label: 'Toutes' },
-                { key: 'NON_PAYING', label: 'Non payant' },
-                { key: 'PAYING', label: 'Payant' }
-              ].map(({ key, label }) => (
+              {PAYING_FILTER_OPTIONS.map(({ key, label }) => (
                 <label key={key} className="flex items-center gap-2 text-xs text-[var(--color-neutre9)]">
-                  <input 
-                    type="radio" 
-                    name="paying" 
+                  <input
+                    type="radio"
+                    name="paying"
                     checked={payingFilter === key}
-                    onChange={() => setPayingFilter(key as any)}
-                    className="accent-[#b79056]" 
+                    onChange={() => setPayingFilter(key)}
+                    className="accent-[#b79056]"
                   />
                   {label}
                 </label>
               ))}
             </div>
           </div>
+
           <div>
             <div className="text-xs text-[var(--color-neutre9)] font-semibold mb-2">Type de stage</div>
             <div className="flex flex-col gap-1">
-              {[
-                { key: 'ALL', label: 'Tous' },
-                { key: 'Initiation', label: 'Initiation' },
-                { key: 'Perfectionnement', label: 'Perfectionnement' },
-                { key: 'Pré-emploi', label: 'Pré-emploi' }
-              ].map(({ key, label }) => (
+              {INTERNSHIP_TYPE_FILTER_OPTIONS.map(({ key, label }) => (
                 <label key={key} className="flex items-center gap-2 text-xs text-[var(--color-neutre9)]">
-                  <input 
-                    type="radio" 
-                    name="internshipType" 
+                  <input
+                    type="radio"
+                    name="internshipType"
                     checked={typeFilter === key}
-                    onChange={() => setTypeFilter(key as any)}
-                    className="accent-[#b79056]" 
+                    onChange={() => setTypeFilter(key)}
+                    className="accent-[#b79056]"
                   />
                   {label}
                 </label>

@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import EtudiantHeader from './EtudiantHeader';
-import { Link } from 'react-router-dom';
-import { getPendingApplicationsOfStudent, getApplicationsApprovedOfStudent, updateStudentStatus, deleteApplication } from '../api/studentApi';
+import EtudiantHeader from '../student/StudentHeader';
+import { getPendingApplicationsOfStudent, getApplicationsApprovedOfStudent, updateStudentStatus, deleteApplication } from '../../api/studentApi';
 
 interface Application {
   id: number;
@@ -35,8 +34,8 @@ export default function MonStageEtudiant() {
           getApplicationsApprovedOfStudent()
         ]);
         
-        setPendingApplications(pendingRes.data || []);
-        setApprovedApplications(approvedRes.data || []);
+        setPendingApplications(pendingRes?.data || []);
+        setApprovedApplications(approvedRes?.data || []);
       } catch (error) {
         console.error('Erreur lors du chargement des candidatures:', error);
       } finally {
@@ -57,8 +56,8 @@ export default function MonStageEtudiant() {
         getPendingApplicationsOfStudent(),
         getApplicationsApprovedOfStudent()
       ]);
-      setPendingApplications(pendingRes.data || []);
-      setApprovedApplications(approvedRes.data || []);
+      setPendingApplications(pendingRes?.data || []);
+      setApprovedApplications(approvedRes?.data || []);
     } catch (error) {
       console.error('Erreur lors de l\'acceptation:', error);
       alert('Erreur lors de l\'acceptation de l\'offre');
@@ -75,8 +74,8 @@ export default function MonStageEtudiant() {
         getPendingApplicationsOfStudent(),
         getApplicationsApprovedOfStudent()
       ]);
-      setPendingApplications(pendingRes.data || []);
-      setApprovedApplications(approvedRes.data || []);
+      setPendingApplications(pendingRes?.data || []);
+      setApprovedApplications(approvedRes?.data || []);
     } catch (error) {
       console.error('Erreur lors du refus:', error);
       alert('Erreur lors du refus de l\'offre');
@@ -94,8 +93,8 @@ export default function MonStageEtudiant() {
         getPendingApplicationsOfStudent(),
         getApplicationsApprovedOfStudent()
       ]);
-      setPendingApplications(pendingRes.data || []);
-      setApprovedApplications(approvedRes.data || []);
+      setPendingApplications(pendingRes?.data || []);
+      setApprovedApplications(approvedRes?.data || []);
     } catch (error) {
       console.error('Erreur lors de la suppression:', error);
       alert('Erreur lors de la suppression de la candidature');
@@ -275,3 +274,4 @@ export default function MonStageEtudiant() {
     </div>
   );
 }
+

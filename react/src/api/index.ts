@@ -8,8 +8,11 @@ export * from './studentApi';
 export * from './teacherApi';
 export * from './profileApi';
 export * from './stageApi';
-export * from './stageDetailApi';
+// stageDetailApi est redondant avec stageApi
+// export * from './stageDetailApi';
 export * from './notificationApi';
 export * from './adminApi';
-export * from './profilePhotoApi';
-export * from './downloadApi';
+// profilePhotoApi est redondant avec enterpriseApi
+// export * from './profilePhotoApi';
+// downloadApi est redondant avec stageApi
+// export * from './downloadApi';

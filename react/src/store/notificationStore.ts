@@ -35,9 +35,10 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
         unreadCount: notifications.length,
         loading: false 
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as { response?: { status?: number; data?: { message?: string } }; message?: string };
       set({ 
-        error: error.message || 'Erreur lors du chargement des notifications',
+        error: err.message || 'Erreur lors du chargement des notifications',
         loading: false 
       });
     }
@@ -57,9 +58,10 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
         notifications: updatedNotifications,
         unreadCount: updatedNotifications.length 
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as { response?: { status?: number; data?: { message?: string } }; message?: string };
       console.error('Erreur marquage notification:', error);
-      set({ error: error.message || 'Erreur lors du marquage de la notification' });
+      set({ error: err.message || 'Erreur lors du marquage de la notification' });
     }
   },
 

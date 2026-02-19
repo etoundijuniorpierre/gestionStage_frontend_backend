@@ -1,20 +1,29 @@
-import { useState, useEffect} from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import EtudiantHeader from '../EtudiantHeader';
+import EtudiantHeader from '../student/StudentHeader';
 import ConfirmationModal from '../admin/ConfirmationModal';
 import { updateStudentStatus, deleteApplication, getStudentStatus } from '../../api';
 import { useStudentStatus } from '../../hooks/useStudentStatus';
-import EnterpriseLogo from '../entreprise/EnterpriseLogo';
+import EnterpriseLogo from '../enterprise/EnterpriseLogo';
 import { Link } from 'react-router-dom';
+
+import type { ApplicationResponseDto } from '../../types/application';
+
+interface InternshipStatus {
+  onInternship: boolean;
+  inInternship?: boolean; // Pour compatibilité si utilisé ailleurs
+  message: string;
+  canApply: boolean;
+}
 
 export default function MonStageEtudiant() {
   const studentStatus = useStudentStatus();
   const { pendingApplications, approvedApplications, loading } = studentStatus;
   const [acceptingApplication, setAcceptingApplication] = useState<number | null>(null);
   const [showCongratulations, setShowCongratulations] = useState(false);
-  const [internshipStatus, setInternshipStatus] = useState<any>(null);
+  const [internshipStatus, setInternshipStatus] = useState<InternshipStatus | null>(null);
   const [statusLoading, setStatusLoading] = useState(true);
-  const [currentInternship, setCurrentInternship] = useState<any>(null);
+  const [currentInternship, setCurrentInternship] = useState<ApplicationResponseDto | null>(null);
   const [confirmModal, setConfirmModal] = useState<{
     isOpen: boolean;
     type: 'accept' | 'reject' | 'delete';
@@ -27,6 +36,10 @@ export default function MonStageEtudiant() {
     const fetchStatus = async () => {
       try {
         const statusResponse = await getStudentStatus();
+        if (!statusResponse?.data) {
+          console.error("Status response or data is missing");
+          return;
+        }
         setInternshipStatus(statusResponse.data);
         
         console.log('Student status from backend:', statusResponse.data);
@@ -71,28 +84,32 @@ export default function MonStageEtudiant() {
     setConfirmModal({ isOpen: false, type: 'accept', applicationId: null, title: '', message: '' });
     try {
       const response = await updateStudentStatus(applicationId, true);
-      // Stocker les informations du stage accepté
-      setCurrentInternship(response.data);
-      localStorage.setItem('currentInternship', JSON.stringify(response.data));
-      
-      // Mettre à jour le statut local
-      setInternshipStatus({ 
-        inInternship: true, 
-        onInternship: true,
-        message: 'Vous êtes en stage', 
-        canApply: false 
-      });
-      
-      setShowCongratulations(true);
-      
-      // Rafraîchir le statut après un délai
-      setTimeout(async () => {
-        setShowCongratulations(false);
-        await studentStatus.refresh();
-        // Recharger le statut depuis le serveur
-        const newStatus = await getStudentStatus();
-        setInternshipStatus(newStatus.data);
-      }, 3000);
+      if (response?.data) {
+        // Stocker les informations du stage accepté
+        setCurrentInternship(response.data);
+        localStorage.setItem('currentInternship', JSON.stringify(response.data));
+        
+        // Mettre à jour le statut local
+        setInternshipStatus({ 
+          inInternship: true, 
+          onInternship: true,
+          message: 'Vous êtes en stage', 
+          canApply: false 
+        });
+        
+        setShowCongratulations(true);
+        
+        // Rafraîchir le statut après un délai
+        setTimeout(async () => {
+          setShowCongratulations(false);
+          await studentStatus.refresh();
+          // Recharger le statut depuis le serveur
+          const newStatus = await getStudentStatus();
+          if (newStatus?.data) {
+            setInternshipStatus(newStatus.data);
+          }
+        }, 3000);
+      }
     } catch (error) {
       console.error('Erreur lors de l\'acceptation:', error);
       setAcceptingApplication(null);

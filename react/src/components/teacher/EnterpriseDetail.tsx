@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import TeacherHeader from './TeacherHeader';
-import { approveEnterprise, getEnterpriseInPartnership } from '../../api/teacherApi';
+import { getTeacherEnterpriseInPartnership } from '../../api/teacherApi';
+import { approveEnterprise } from '../../api/adminApi';
 import { api } from '../../api/api';
 import type { EnterpriseResponseDto } from '../../types/enterprise';
-import EnterpriseLogo from '../entreprise/EnterpriseLogo';
+import EnterpriseLogo from '../enterprise/EnterpriseLogo';
+
+import type { OfferResponseDto } from '../../types/offer';
 
 const EnterpriseDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [enterprise, setEnterprise] = useState<EnterpriseResponseDto | null>(null);
-  const [offers, setOffers] = useState<any[]>([]);
+  const [offers, setOffers] = useState<OfferResponseDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -30,9 +33,9 @@ const EnterpriseDetail: React.FC = () => {
         }
         
         // Récupérer l'entreprise depuis la liste des partenaires
-        const response = await getEnterpriseInPartnership();
+        const response = await getTeacherEnterpriseInPartnership();
         const enterprises = response.data || [];
-        const enterpriseData = enterprises.find((ent: any) => ent.id === enterpriseId);
+        const enterpriseData = enterprises.find((ent: EnterpriseResponseDto) => ent.id === enterpriseId);
         
         if (!enterpriseData) {
           setError('Entreprise introuvable');
@@ -50,7 +53,7 @@ const EnterpriseDetail: React.FC = () => {
               headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
             });
             const allOffers = offersResponse.data || [];
-            const enterpriseOffers = allOffers.filter((offer: any) => offer.enterprise?.id === enterpriseData.id);
+            const enterpriseOffers = allOffers.filter((offer: OfferResponseDto) => offer.enterprise?.id === enterpriseData.id);
             setOffers(enterpriseOffers);
           } catch (offersErr) {
             console.error('Erreur lors du chargement des offres:', offersErr);

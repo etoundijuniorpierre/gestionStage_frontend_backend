@@ -1,8 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { updateLanguages, updateGithubLink, updateLinkedinLink, getCurrentStudentInfo, updateEmail, updateStudentProfile } from '../../api/studentApi';
-import EtudiantHeader from '../EtudiantHeader';
+import { updateLanguages, updateGithubLink, updateLinkedinLink, getCurrentStudentInfo } from '../../api/studentApi';
+import EtudiantHeader from './StudentHeader';
 
 interface StudentProfile {
   name: string;
@@ -36,7 +35,7 @@ export default function MonProfil() {
     const fetchStudentProfile = async () => {
       try {
         const response = await getCurrentStudentInfo();
-        const studentData = response.data;
+        const studentData = response?.data;
         
         const profile = {
           name: studentData.name || '',
@@ -77,7 +76,7 @@ export default function MonProfil() {
         setNewLanguage('');
         setSuccessStates(prev => ({ ...prev, language: true }));
         setTimeout(() => setSuccessStates(prev => ({ ...prev, language: false })), 2000);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Erreur lors de l\'ajout de la langue:', error);
       } finally {
         setLoadingStates(prev => ({ ...prev, language: false }));
@@ -93,7 +92,7 @@ export default function MonProfil() {
       setProfile(prev => prev ? { ...prev, githubLink: editForm.githubLink } : null);
       setSuccessStates(prev => ({ ...prev, github: true }));
       setTimeout(() => setSuccessStates(prev => ({ ...prev, github: false })), 2000);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erreur lors de la mise à jour du lien GitHub:', error);
     } finally {
       setLoadingStates(prev => ({ ...prev, github: false }));
@@ -108,7 +107,7 @@ export default function MonProfil() {
       setProfile(prev => prev ? { ...prev, linkedinLink: editForm.linkedinLink } : null);
       setSuccessStates(prev => ({ ...prev, linkedin: true }));
       setTimeout(() => setSuccessStates(prev => ({ ...prev, linkedin: false })), 2000);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erreur lors de la mise à jour du lien LinkedIn:', error);
     } finally {
       setLoadingStates(prev => ({ ...prev, linkedin: false }));
@@ -402,3 +401,4 @@ export default function MonProfil() {
     </div>
   );
 }
+

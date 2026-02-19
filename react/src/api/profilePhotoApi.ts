@@ -28,14 +28,15 @@ export const uploadProfilePhoto = async (photo: File) => {
         'Content-Type': 'multipart/form-data'
       }
     });
-  } catch (error: any) {
-    if (error.response?.status === 401) {
+  } catch (error: unknown) {
+      const err = error as { response?: { status?: number; data?: { message?: string } }; message?: string };
+    if (err.response?.status === 401) {
       throw new Error('Session expirée. Veuillez vous reconnecter.');
     }
-    if (error.response?.status === 413) {
+    if (err.response?.status === 413) {
       throw new Error('Fichier trop volumineux');
     }
-    throw new Error(error.response?.data?.message || error.message || 'Erreur lors de l\'upload de la photo');
+    throw new Error(err.response?.data?.message || err.message || 'Erreur lors de l\'upload de la photo');
   }
 };
 
@@ -46,13 +47,14 @@ export const getEnterpriseLogo = async () => {
       responseType: 'blob',
       headers: getAuthHeaders()
     });
-  } catch (error: any) {
-    if (error.response?.status === 401) {
+  } catch (error: unknown) {
+      const err = error as { response?: { status?: number; data?: { message?: string } }; message?: string };
+    if (err.response?.status === 401) {
       throw new Error('Session expirée. Veuillez vous reconnecter.');
     }
-    if (error.response?.status === 404) {
+    if (err.response?.status === 404) {
       throw new Error('Logo non trouvé');
     }
-    throw new Error(error.response?.data?.message || 'Erreur lors de la récupération du logo');
+    throw new Error(err.response?.data?.message || 'Erreur lors de la récupération du logo');
   }
 };

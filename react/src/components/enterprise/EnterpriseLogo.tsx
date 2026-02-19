@@ -12,7 +12,6 @@ interface EnterpriseLogoProps {
 
 const EnterpriseLogo: React.FC<EnterpriseLogoProps> = ({ 
   enterpriseName, 
-  enterpriseId, 
   hasLogo = false, 
   className = '',
   size = 'md'
@@ -44,7 +43,7 @@ const EnterpriseLogo: React.FC<EnterpriseLogoProps> = ({
           } else {
             setLogoError(true);
           }
-        } catch (error) {
+        } catch {
           setLogoError(true);
         }
       };
@@ -61,7 +60,7 @@ const EnterpriseLogo: React.FC<EnterpriseLogoProps> = ({
         URL.revokeObjectURL(logoUrl);
       }
     };
-  }, [hasLogo]);
+  }, [hasLogo, logoUrl]);
 
   const initials = generateEnterpriseInitials(enterpriseName);
 

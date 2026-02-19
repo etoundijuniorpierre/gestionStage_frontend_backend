@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { getEnterpriseLogo, uploadProfilePhoto, getCurrentEnterpriseInfo, updateContact, updateLocation, updateLogo } from '../api/enterpriseApi';
-import EnterpriseHeader from './entreprise/EnterpriseHeader';
+import { getEnterpriseLogo, getCurrentEnterpriseInfo, updateContact, updateLocation, updateLogo } from '../../api/enterpriseApi';
+import EnterpriseHeader from './EnterpriseHeader';
 
 interface EnterpriseProfile {
   id: number;
@@ -54,11 +54,11 @@ const ProfilEntreprise: React.FC = () => {
             const logoObjectUrl = URL.createObjectURL(logoBlob);
             setLogoUrl(logoObjectUrl);
           }
-        } catch (logoErr) {
+        } catch {
           console.log('Aucun logo disponible');
           setLogoUrl(null);
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Erreur lors du chargement du profil:', err);
         
         const fallbackProfile = {
@@ -103,7 +103,7 @@ const ProfilEntreprise: React.FC = () => {
     try {
       await updateContact(editForm.contact);
       setProfile(prev => prev ? { ...prev, contact: editForm.contact } : null);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Erreur lors de la mise à jour du contact:', err);
     } finally {
       setLoadingStates(prev => ({ ...prev, contact: false }));
@@ -116,7 +116,7 @@ const ProfilEntreprise: React.FC = () => {
     try {
       await updateLocation(editForm.location);
       setProfile(prev => prev ? { ...prev, location: editForm.location } : null);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Erreur lors de la mise à jour de la localisation:', err);
     } finally {
       setLoadingStates(prev => ({ ...prev, location: false }));
@@ -139,10 +139,10 @@ const ProfilEntreprise: React.FC = () => {
           if (logoUrl) URL.revokeObjectURL(logoUrl);
           setLogoUrl(logoObjectUrl);
         }
-      } catch (logoErr) {
+      } catch {
         console.log('Erreur lors du rechargement du logo');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Erreur lors de l\'upload du logo:', err);
     } finally {
       setLoadingStates(prev => ({ ...prev, logo: false }));

@@ -4,7 +4,7 @@ import AdminHeader from './AdminHeader';
 import { getPendingEnterprises, getEnterpriseInPartnership } from '../../api/adminApi';
 import type { EnterpriseResponseDto } from '../../types/enterprise';
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
-import EnterpriseLogo from '../entreprise/EnterpriseLogo';
+import EnterpriseLogo from '../enterprise/EnterpriseLogo';
 
 const EnterprisesList: React.FC = () => {
   const navigate = useNavigate();

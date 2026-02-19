@@ -37,9 +37,9 @@ const ApplicationDetail: React.FC = () => {
     const fetchApplication = async () => {
       try {
         // Récupérer depuis le state de navigation
-        const stateAny = location.state as unknown as { application?: ApplicationDetail } | undefined;
-        if (stateAny && stateAny.application) {
-          setApplication(stateAny.application);
+        const navState = location.state as { application?: ApplicationDetail } | undefined;
+        if (navState && navState.application) {
+          setApplication(navState.application);
           setLoading(false);
           return;
         }
@@ -108,10 +108,10 @@ const ApplicationDetail: React.FC = () => {
       // Afficher un message de succès temporaire
       const message = approved ? 'Candidature acceptée avec succès!' : 'Candidature refusée.';
       alert(message);
-      navigate('/entreprise/candidatures');
-    } catch (err: any) {
+      navigate('/enterprise/candidatures');
+    } catch (err: unknown) {
       console.error('Erreur lors de la validation:', err);
-      const errorMessage = err?.response?.data?.message || 'Erreur lors de la validation de la candidature';
+      const errorMessage = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Erreur lors de la validation de la candidature';
       alert(errorMessage);
     } finally {
       setProcessing(false);
@@ -148,7 +148,7 @@ const ApplicationDetail: React.FC = () => {
           {/* Header avec bouton retour */}
           <div className="flex items-center mb-6">
             <button 
-              onClick={() => navigate('/entreprise/candidatures')}
+              onClick={() => navigate('/enterprise/candidatures')}
               className="mr-4 text-[#2d2d2d] hover:text-[#4c7a4c]"
             >
               <span className="text-2xl">←</span>

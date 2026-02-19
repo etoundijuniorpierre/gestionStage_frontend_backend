@@ -7,13 +7,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 interface UserSettingsModificationProps {
   currentEmail: string;
-  verifiedPassword: string;
   onCancel: () => void;
 }
 
 const UserSettingsModification: React.FC<UserSettingsModificationProps> = ({ 
   currentEmail,
-  verifiedPassword,
   onCancel 
 }) => {
   const [formData, setFormData] = useState({
@@ -85,9 +83,10 @@ const UserSettingsModification: React.FC<UserSettingsModificationProps> = ({
         logout();
         navigate('/login', { replace: true });
       }, 5000);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as { response?: { status?: number; data?: { message?: string } }; message?: string };
       setErrors({ 
-        newEmail: error?.message || 'Erreur lors de la mise à jour de l\'email' 
+        newEmail: err?.response?.data?.message || err?.message || 'Erreur lors de la mise à jour de l\'email' 
       });
     } finally {
       setLoadingEmail(false);
@@ -109,9 +108,10 @@ const UserSettingsModification: React.FC<UserSettingsModificationProps> = ({
         logout();
         navigate('/login', { replace: true });
       }, 5000);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as { response?: { status?: number; data?: { message?: string } }; message?: string };
       setErrors({ 
-        newPassword: error?.message || 'Erreur lors de la mise à jour du mot de passe' 
+        newPassword: err?.response?.data?.message || err?.message || 'Erreur lors de la mise à jour du mot de passe' 
       });
     } finally {
       setLoadingPassword(false);

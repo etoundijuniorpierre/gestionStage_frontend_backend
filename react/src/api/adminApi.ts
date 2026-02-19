@@ -67,23 +67,6 @@ export const getStudentsPagination = async (page: number, size: number) => {
   });
 };
 
-// Supprimer le compte utilisateur (admin)
-export const deleteUserAccount = async () => {
-  return api.delete('/updateProfile/deleteUserAccount', {
-    headers: getAuthHeaders()
-  });
-};
-
-// Vérifier le mot de passe
-export const verifyPassword = async (password: string) => {
-  if (!password || password.trim() === '') {
-    throw new Error('Mot de passe requis');
-  }
-  return api.put('/updateProfile/verifyPassword', { password }, {
-    headers: getAuthHeaders()
-  });
-};
-
 // Supprimer une entreprise (admin)
 export const deleteEnterprise = async (enterpriseId: number) => {
   return api.delete(`/updateProfile/deleteAccount/${enterpriseId}`, {

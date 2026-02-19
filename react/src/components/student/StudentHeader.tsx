@@ -1,8 +1,8 @@
-import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import logo from '../assets/logo.png';
+import { NavLink, useNavigate } from 'react-router-dom';
+import logo from '../../assets/logo.png';
 import { motion } from 'framer-motion';
-import NotificationBell from './NotificationBell';
-import { useAuthStore } from '../store/authStore';
+import NotificationBell from '../NotificationBell';
+import { useAuthStore } from '../../store/authStore';
 
 const navLinks = [
   { to: '/etudiant/stages', label: 'Liste des stages' },
@@ -15,7 +15,6 @@ const rightLinks = [
 ];
 
 export default function EtudiantHeader() {
-  const location = useLocation();
   const navigate = useNavigate();
   const { logout } = useAuthStore();
 

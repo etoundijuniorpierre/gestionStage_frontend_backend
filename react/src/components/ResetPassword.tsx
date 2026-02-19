@@ -33,8 +33,9 @@ const ResetPassword = () => {
       await sendResetToken(data.email);
       setEmail(data.email);
       setStep(2);
-    } catch (error: any) {
-      setError(error.message);
+    } catch (error: unknown) {
+      const err = error as { response?: { status?: number; data?: { message?: string } }; message?: string };
+      setError(err?.message || 'Une erreur est survenue');
     } finally {
       setLoading(false);
     }
@@ -46,8 +47,9 @@ const ResetPassword = () => {
     try {
       await verifyResetToken(email, data.token);
       setStep(3);
-    } catch (error: any) {
-      setError(error.message);
+    } catch (error: unknown) {
+      const err = error as { response?: { status?: number; data?: { message?: string } }; message?: string };
+      setError(err?.message || 'Une erreur est survenue');
     } finally {
       setLoading(false);
     }
@@ -65,8 +67,9 @@ const ResetPassword = () => {
       await resetPassword({ email, password: data.password });
       setSuccess(true);
       setTimeout(() => navigate('/login'), 3000);
-    } catch (error: any) {
-      setError(error.message);
+    } catch (error: unknown) {
+      const err = error as { response?: { status?: number; data?: { message?: string } }; message?: string };
+      setError(err?.message || 'Une erreur est survenue');
     } finally {
       setLoading(false);
     }

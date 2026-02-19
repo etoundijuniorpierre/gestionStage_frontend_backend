@@ -11,17 +11,18 @@ export const downloadCV = async (applicationId: number) => {
       responseType: 'blob',
       headers: getAuthHeaders()
     });
-  } catch (error: any) {
-    if (error.response?.status === 401) {
+  } catch (error: unknown) {
+      const err = error as { response?: { status?: number; data?: { message?: string } }; message?: string };
+    if (err.response?.status === 401) {
       throw new Error('Session expirée. Veuillez vous reconnecter.');
     }
-    if (error.response?.status === 404) {
+    if (err.response?.status === 404) {
       throw new Error('CV non trouvé');
     }
-    if (error.response?.status === 403) {
+    if (err.response?.status === 403) {
       throw new Error('Accès non autorisé à ce fichier');
     }
-    throw new Error(error.response?.data?.message || 'Erreur lors du téléchargement du CV');
+    throw new Error(err.response?.data?.message || 'Erreur lors du téléchargement du CV');
   }
 };
 
@@ -36,17 +37,18 @@ export const downloadCoverLetter = async (applicationId: number) => {
       responseType: 'blob',
       headers: getAuthHeaders()
     });
-  } catch (error: any) {
-    if (error.response?.status === 401) {
+  } catch (error: unknown) {
+      const err = error as { response?: { status?: number; data?: { message?: string } }; message?: string };
+    if (err.response?.status === 401) {
       throw new Error('Session expirée. Veuillez vous reconnecter.');
     }
-    if (error.response?.status === 404) {
+    if (err.response?.status === 404) {
       throw new Error('Lettre de motivation non trouvée');
     }
-    if (error.response?.status === 403) {
+    if (err.response?.status === 403) {
       throw new Error('Accès non autorisé à ce fichier');
     }
-    throw new Error(error.response?.data?.message || 'Erreur lors du téléchargement de la lettre de motivation');
+    throw new Error(err.response?.data?.message || 'Erreur lors du téléchargement de la lettre de motivation');
   }
 };
 
@@ -61,17 +63,18 @@ export const downloadConvention = async (offerId: number) => {
       responseType: 'blob',
       headers: getAuthHeaders()
     });
-  } catch (error: any) {
-    if (error.response?.status === 401) {
+  } catch (error: unknown) {
+      const err = error as { response?: { status?: number; data?: { message?: string } }; message?: string };
+    if (err.response?.status === 401) {
       throw new Error('Session expirée. Veuillez vous reconnecter.');
     }
-    if (error.response?.status === 404) {
+    if (err.response?.status === 404) {
       throw new Error('Convention non trouvée');
     }
-    if (error.response?.status === 403) {
+    if (err.response?.status === 403) {
       throw new Error('Accès non autorisé à ce fichier');
     }
-    throw new Error(error.response?.data?.message || 'Erreur lors du téléchargement de la convention');
+    throw new Error(err.response?.data?.message || 'Erreur lors du téléchargement de la convention');
   }
 };
 

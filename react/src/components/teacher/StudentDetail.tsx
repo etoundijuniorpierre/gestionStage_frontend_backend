@@ -2,40 +2,111 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import TeacherHeader from './TeacherHeader';
-import { getStudentsByDepartment } from '../../api/teacherApi';
+import { 
+  getStudentsByDepartment, 
+  getStudentApplications, 
+  downloadStudentCV, 
+  downloadStudentCoverLetter,
+  downloadBulkDocuments 
+} from '../../api/teacherApi';
 import type { StudentResponseDto } from '../../types/student';
+import { type ApplicationResponseDto } from '../../types/application';
 
 export default function StudentDetail() {
   const { id } = useParams<{ id: string }>();
   const [student, setStudent] = useState<StudentResponseDto | null>(null);
+  const [applications, setApplications] = useState<ApplicationResponseDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [downloading, setDownloading] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!id) return;
 
-    setLoading(true);
-    getStudentsByDepartment()
-      .then(res => {
-        const students = res.data as StudentResponseDto[];
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const [studentsRes, appsRes] = await Promise.all([
+          getStudentsByDepartment(),
+          getStudentApplications(parseInt(id))
+        ]);
+
+        const students = studentsRes.data as StudentResponseDto[];
         const foundStudent = students.find(s => s.id === parseInt(id));
         
         if (foundStudent) {
           setStudent(foundStudent);
+          setApplications(appsRes.data);
           setError(null);
         } else {
           setError('Étudiant non trouvé');
         }
-      })
-      .catch(err => {
-        console.error('Erreur lors de la récupération des détails de l\'étudiant:', err);
-        setError('Impossible de récupérer les détails de l\'étudiant. Veuillez réessayer plus tard.');
-      })
-      .finally(() => setLoading(false));
+      } catch (err) {
+        console.error('Erreur lors de la récupération des détails:', err);
+        setError('Impossible de récupérer les détails de l\'étudiant.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, [id]);
 
+  const triggerDownload = (blob: Blob, filename: string) => {
+    const url = window.URL.createObjectURL(new Blob([blob]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    link.parentNode?.removeChild(link);
+  };
 
+  const handleDownloadCV = async (appId: number, studentName: string) => {
+    try {
+      setDownloading(`cv-${appId}`);
+      const blob = await downloadStudentCV(appId);
+      triggerDownload(blob, `${studentName}_CV.pdf`);
+    } catch (err) {
+      console.error('Erreur lors du téléchargement du CV:', err);
+      alert('Erreur lors du téléchargement du CV');
+    } finally {
+      setDownloading(null);
+    }
+  };
+
+  const handleDownloadCL = async (appId: number, studentName: string) => {
+    try {
+      setDownloading(`cl-${appId}`);
+      const blob = await downloadStudentCoverLetter(appId);
+      triggerDownload(blob, `${studentName}_LettreMotivation.pdf`);
+    } catch (err) {
+      console.error('Erreur lors du téléchargement de la lettre de motivation:', err);
+      alert('Erreur lors du téléchargement de la lettre de motivation');
+    } finally {
+      setDownloading(null);
+    }
+  };
+
+  const handleDownloadAllDocs = async () => {
+    if (!student || applications.length === 0) return;
+    try {
+      setDownloading('bulk');
+      const appIds = applications.filter(app => app.hasFiles.hasCV || app.hasFiles.hasCoverLetter).map(app => app.id);
+      if (appIds.length === 0) {
+        alert("Aucun document à télécharger pour cet étudiant.");
+        return;
+      }
+      const blob = await downloadBulkDocuments(appIds);
+      triggerDownload(blob, `${student.name}_${student.firstName}_tous_les_documents.zip`);
+    } catch (err) {
+      console.error('Erreur lors du téléchargement groupé:', err);
+      alert('Erreur lors du téléchargement groupé');
+    } finally {
+      setDownloading(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-login-gradient">
@@ -43,7 +114,7 @@ export default function StudentDetail() {
       <main className="container max-w-4xl mx-auto px-4 py-8">
         <div className="bg-[#e8e0d0] rounded-lg p-6 shadow-lg">
           {/* Bouton retour */}
-          <div className="flex items-center mb-6">
+          <div className="flex items-center justify-between mb-6">
             <button 
               onClick={() => navigate('/enseignant/etudiants')}
               className="flex items-center text-gray-700 hover:text-gray-900"
@@ -51,6 +122,26 @@ export default function StudentDetail() {
               <span className="text-xl mr-2">←</span>
               <span className="text-xl font-medium">Retour à la liste</span>
             </button>
+            
+            {student && applications.length > 0 && (
+              <button
+                onClick={handleDownloadAllDocs}
+                disabled={!!downloading}
+                className="bg-[var(--color-vert)] text-white px-4 py-2 rounded shadow hover:bg-opacity-90 transition-all flex items-center disabled:opacity-50"
+              >
+                {downloading === 'bulk' ? (
+                  <>
+                    <span className="animate-spin mr-2">⏳</span>
+                    Préparation...
+                  </>
+                ) : (
+                  <>
+                    <span className="mr-2">📦</span>
+                    Tout télécharger (.zip)
+                  </>
+                )}
+              </button>
+            )}
           </div>
 
           {loading ? (
@@ -87,41 +178,60 @@ export default function StudentDetail() {
                         </span>
                       </p>
                     </div>
-                    
-
                   </div>
                 </div>
               </motion.div>
               
-              {/* Statut du stage */}
-              <motion.div 
-                className="bg-white rounded-lg shadow-md p-6 text-center"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: 0.1 }}
-              >
-                {student.onInternship ? (
-                  <div className="text-green-600">
-                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    <h3 className="text-lg font-semibold mb-2">Étudiant en stage</h3>
-                    <p className="text-gray-600">Cet étudiant effectue actuellement un stage.</p>
-                  </div>
-                ) : (
-                  <div className="text-yellow-600">
-                    <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    <h3 className="text-lg font-semibold mb-2">Étudiant sans stage</h3>
-                    <p className="text-gray-600">Cet étudiant n'a pas encore trouvé de stage.</p>
-                  </div>
-                )}
-              </motion.div>
+              <h2 className="text-xl font-semibold text-[var(--color-dark)] mb-4">Documents et Candidatures</h2>
+              
+              {applications.length === 0 ? (
+                <div className="bg-white rounded-lg shadow-md p-6 text-center text-gray-500">
+                  Aucun document disponible pour cet étudiant.
+                </div>
+              ) : (
+                <div className="grid gap-4">
+                  {applications.map(app => (
+                    <motion.div 
+                      key={app.id}
+                      className="bg-white rounded-lg shadow-md p-4 flex items-center justify-between"
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                    >
+                      <div>
+                        <h3 className="font-semibold text-gray-800">{app.offer?.title || "Offre spontanée"}</h3>
+                        <p className="text-sm text-gray-600">{app.enterprise.name}</p>
+                        <span className={`text-xs px-2 py-0.5 rounded-full mt-1 inline-block ${
+                          app.state === 'ACCEPTED' ? 'bg-green-100 text-green-800' :
+                          app.state === 'REJECTED' ? 'bg-red-100 text-red-800' :
+                          'bg-blue-100 text-blue-800'
+                        }`}>
+                          {app.state}
+                        </span>
+                      </div>
+                      <div className="flex gap-2">
+                        {app.hasFiles.hasCV && (
+                          <button
+                            onClick={() => handleDownloadCV(app.id, `${student.name}_${student.firstName}`)}
+                            disabled={!!downloading}
+                            className="bg-gray-100 text-gray-700 px-3 py-1.5 rounded text-sm hover:bg-gray-200 transition-colors flex items-center"
+                          >
+                            {downloading === `cv-${app.id}` ? '⏳' : '📄 CV'}
+                          </button>
+                        )}
+                        {app.hasFiles.hasCoverLetter && (
+                          <button
+                            onClick={() => handleDownloadCL(app.id, `${student.name}_${student.firstName}`)}
+                            disabled={!!downloading}
+                            className="bg-gray-100 text-gray-700 px-3 py-1.5 rounded text-sm hover:bg-gray-200 transition-colors flex items-center"
+                          >
+                            {downloading === `cl-${app.id}` ? '⏳' : '✉️ LM'}
+                          </button>
+                        )}
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
             </div>
           ) : null}
         </div>

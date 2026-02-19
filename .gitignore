@@ -1,6 +1,5 @@
 # OS
 .DS_Store
-Thumbs.db
 db/
 
 # IDE
@@ -48,12 +47,3 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-
-# Application specific
-react/pnpm-lock.yaml
-react/package-lock.json
-react/yarn.lock
-
-# Documentation & temporary logs
-documentation_technique_de_gestion_de_stage.pdf
-*.sql

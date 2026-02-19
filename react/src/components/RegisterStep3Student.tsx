@@ -20,7 +20,7 @@ type Props = {
 };
 
 const RegisterStep3Student = ({ onPrev, onFinish }: Props) => {
-  const { formData, setFormData, setStep } = useRegistrationStore();
+  const { formData, setStep } = useRegistrationStore();
   const { register, handleSubmit, formState: { errors, isValid } } = useForm<StudentFormData>({
     mode: 'onChange',
     defaultValues: {

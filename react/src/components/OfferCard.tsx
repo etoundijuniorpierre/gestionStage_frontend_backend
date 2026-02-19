@@ -3,7 +3,8 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useApplicationsStore } from '../store/applicationsStore';
 import type { OfferResponseDto } from '../types/offer';
-import EnterpriseLogo from './entreprise/EnterpriseLogo';
+import EnterpriseLogo from './enterprise/EnterpriseLogo';
+import { OfferStatus } from '../constants/offerConstants';
 
 interface OfferCardProps {
   offer: OfferResponseDto;
@@ -21,23 +22,20 @@ const OfferCard: React.FC<OfferCardProps> = ({ offer, onClick }) => {
     return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'APPROVED': return 'bg-green-100 text-green-800';
-      case 'PENDING': return 'bg-yellow-100 text-yellow-800';
-      case 'REJECTED': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
+  const STATUS_COLOR: Record<string, string> = {
+    [OfferStatus.APPROVED]: 'bg-green-100 text-green-800',
+    [OfferStatus.PENDING]: 'bg-yellow-100 text-yellow-800',
+    [OfferStatus.REJECTED]: 'bg-red-100 text-red-800',
   };
 
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'APPROVED': return 'Offre Acceptée';
-      case 'PENDING': return 'En attente';
-      case 'REJECTED': return 'Rejetée';
-      default: return status;
-    }
+  const STATUS_TEXT: Record<string, string> = {
+    [OfferStatus.APPROVED]: 'Offre Acceptée',
+    [OfferStatus.PENDING]: 'En attente',
+    [OfferStatus.REJECTED]: 'Rejetée',
   };
+
+  const getStatusColor = (status: string) => STATUS_COLOR[status] ?? 'bg-gray-100 text-gray-800';
+  const getStatusText = (status: string) => STATUS_TEXT[status] ?? status;
 
   return (
     <motion.div
@@ -95,7 +93,7 @@ const OfferCard: React.FC<OfferCardProps> = ({ offer, onClick }) => {
           <div className="text-xs text-[var(--color-dark)] mb-1">Nombre de place: <b>{offer.numberOfPlaces || '1'}</b></div>
           <div className="text-xs text-[var(--color-dark)] mb-1">Nombre de postulants: <b>
             <button
-              onClick={(e) => { e.stopPropagation(); navigate('/entreprise/candidatures'); }}
+              onClick={(e) => { e.stopPropagation(); navigate('/enterprise/candidatures'); }}
               className="text-blue-600 hover:text-blue-800 underline font-medium cursor-pointer"
             >
               {getApplicationsCount(offer.id)}

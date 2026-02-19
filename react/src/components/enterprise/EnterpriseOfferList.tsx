@@ -29,7 +29,7 @@ const EnterpriseOfferList: React.FC = () => {
         // Compter les candidatures par offre
         const applicationsData = applicationsResponse.data || [];
         const counts: Record<number, number> = {};
-        applicationsData.forEach((app: any) => {
+        applicationsData.forEach((app: { offer?: { id: number } }) => {
           const offerId = app.offer?.id;
           if (offerId) {
             counts[offerId] = (counts[offerId] || 0) + 1;
@@ -41,7 +41,8 @@ const EnterpriseOfferList: React.FC = () => {
           setApplicationsCount(parseInt(offerId), count);
         });
         
-      } catch (error) {
+      } catch (err) {
+        console.error('Erreur lors du chargement des offres:', err);
         setOffers([]);
       } finally {
         setLoading(false);
@@ -52,7 +53,7 @@ const EnterpriseOfferList: React.FC = () => {
   }, [setApplicationsCount]);
 
   const handleCreateOffer = () => {
-    navigate('/entreprise/creer-offre');
+    navigate('/enterprise/creer-offre');
   };
 
   // Recherche sur le titre ou le domaine
@@ -125,7 +126,7 @@ const EnterpriseOfferList: React.FC = () => {
                 <OfferCard
                   key={offer.id}
                   offer={offer}
-                  onClick={() => navigate(`/entreprise/offres/${offer.id}`)}
+                  onClick={() => navigate(`/enterprise/offres/${offer.id}`)}
                 />
               ))}
             </div>

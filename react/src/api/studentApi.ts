@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { api, getAuthHeaders } from './api';
 
-const handleApiError = (error: unknown, defaultMessage: string) => {
+const handleApiError = (error: unknown, defaultMessage: string): never => {
   if (axios.isAxiosError(error)) {
     if (error.response?.status === 401) {
       throw new Error('Session expirée. Veuillez vous reconnecter.');
@@ -162,17 +162,6 @@ export const updateLinkedinLink = async (linkedin: string) => {
   }
 };
 
-// Mettre à jour l'email
-export const updateEmail = async (email: string) => {
-  try {
-    return await api.patch('/updateProfile/updateEmail', { email }, {
-      headers: getAuthHeaders()
-    });
-  } catch (error) {
-    handleApiError(error, 'Erreur lors de la mise à jour de l\'email');
-  }
-};
-
 // Mettre à jour le profil complet
 export const updateStudentProfile = async (profileData: Record<string, unknown>) => {
   try {
@@ -185,60 +174,6 @@ export const updateStudentProfile = async (profileData: Record<string, unknown>)
 };
 
 
-
-// Télécharger un CV
-export const downloadCV = async (applicationId: number) => {
-  try {
-    if (!applicationId || applicationId <= 0) {
-      throw new Error('ID de candidature invalide');
-    }
-    return await api.get(`/downloadFiles/cv/${applicationId}/download`, {
-      responseType: 'blob',
-      headers: getAuthHeaders()
-    });
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response?.status === 404) {
-      throw new Error('CV non trouvé');
-    }
-    handleApiError(error, 'Erreur lors du téléchargement du CV');
-  }
-};
-
-// Télécharger une lettre de motivation
-export const downloadCoverLetter = async (applicationId: number) => {
-  try {
-    if (!applicationId || applicationId <= 0) {
-      throw new Error('ID de candidature invalide');
-    }
-    return await api.get(`/downloadFiles/coverLetter/${applicationId}/download`, {
-      responseType: 'blob',
-      headers: getAuthHeaders()
-    });
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response?.status === 404) {
-      throw new Error('Lettre de motivation non trouvée');
-    }
-    handleApiError(error, 'Erreur lors du téléchargement de la lettre');
-  }
-};
-
-// Télécharger une convention
-export const downloadConvention = async (offerId: number) => {
-  try {
-    if (!offerId || offerId <= 0) {
-      throw new Error('ID d\'offre invalide');
-    }
-    return await api.get(`/downloadFiles/downloadConvention/${offerId}`, {
-      responseType: 'blob',
-      headers: getAuthHeaders()
-    });
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response?.status === 404) {
-      throw new Error('Convention non trouvée');
-    }
-    handleApiError(error, 'Erreur lors du téléchargement de la convention');
-  }
-};
 
 // Supprimer une candidature
 export const deleteApplication = async (applicationId: number) => {

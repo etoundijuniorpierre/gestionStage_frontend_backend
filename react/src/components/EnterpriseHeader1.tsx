@@ -1,19 +1,18 @@
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import logo from '../assets/logo.png';
 import { motion } from 'framer-motion';
 
 const navLinks = [
-  { to: '/entreprise/offres', label: 'Liste des offres' },
-  { to: '/entreprise/candidatures', label: 'Candidatures' },
+  { to: '/enterprise/offres', label: 'Liste des offres' },
+  { to: '/enterprise/candidatures', label: 'Candidatures' },
 ];
 
 const rightLinks = [
-  { to: 'entreprise/profil', label: 'Profil entreprise' },
-  { to: 'entreprise/parametres', label: 'Paramètres' },
+  { to: '/enterprise/profil', label: 'Profil entreprise' },
+  { to: '/enterprise/parametres', label: 'Paramètres' },
 ];
 
 export default function EnterpriseHeader() {
-  const location = useLocation();
 
   const linkClass =
     'relative text-lg font-light font-[var(--font-family-poiret)] tracking-wider px-1 pb-1 transition-colors duration-200';
@@ -68,7 +67,7 @@ export default function EnterpriseHeader() {
       </nav>
 
       {/* Logo */}
-      <NavLink to="/entreprise/dashboard">
+      <NavLink to="/enterprise/dashboard">
         <img src={logo} alt="Logo" className="h-12 w-auto" />
       </NavLink>
 
@@ -121,3 +120,4 @@ export default function EnterpriseHeader() {
     </header>
   );
 }
+

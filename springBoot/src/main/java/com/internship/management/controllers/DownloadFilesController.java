@@ -14,10 +14,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @RestController
 @RequestMapping(path = "downloadFiles")
@@ -44,9 +47,11 @@ public class DownloadFilesController {
     public ResponseEntity<byte[]> downloadCV(@PathVariable Long id) {
 
         Application application = applicationService.getApplicationById(id);
+        String filename = application.getStudent().getName() + "_" + application.getStudent().getFirstName()
+                + "_CV.pdf";
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=student_CV.pdf")
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(application.getCv());
     }
@@ -55,9 +60,11 @@ public class DownloadFilesController {
     public ResponseEntity<byte[]> downloadCoverLetter(@PathVariable Long id) {
 
         Application application = applicationService.getApplicationById(id);
+        String filename = application.getStudent().getName() + "_" + application.getStudent().getFirstName()
+                + "_LettreMotivation.pdf";
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=student_coverLetter.pdf")
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(application.getCoverLetter());
     }
@@ -75,5 +82,72 @@ public class DownloadFilesController {
         headers.setContentType(MediaType.parseMediaType(logo.getContentType()));
 
         return new ResponseEntity<>(logo.getLogo(), headers, HttpStatus.OK);
+    }
+
+    @GetMapping("/bulkDownload")
+    public ResponseEntity<byte[]> bulkDownload(@RequestParam List<Long> ids) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ZipOutputStream zos = new ZipOutputStream(baos);
+
+        for (Long id : ids) {
+            Application app = applicationService.getApplicationById(id);
+            if (app == null)
+                continue;
+
+            String studentName = app.getStudent().getName() + "_" + app.getStudent().getFirstName();
+
+            if (app.getCv() != null) {
+                ZipEntry cvEntry = new ZipEntry(studentName + "_CV_" + id + ".pdf");
+                zos.putNextEntry(cvEntry);
+                zos.write(app.getCv());
+                zos.closeEntry();
+            }
+
+            if (app.getCoverLetter() != null) {
+                ZipEntry clEntry = new ZipEntry(studentName + "_LettreMotivation_" + id + ".pdf");
+                zos.putNextEntry(clEntry);
+                zos.write(app.getCoverLetter());
+                zos.closeEntry();
+            }
+        }
+        zos.close();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"documents_etudiants.zip\"")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(baos.toByteArray());
+    }
+
+    @GetMapping("/bulkDownloadByStudents")
+    public ResponseEntity<byte[]> bulkDownloadByStudents(@RequestParam List<Long> studentIds) throws IOException {
+        List<Application> applications = applicationService.getApplicationsByStudentIds(studentIds);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ZipOutputStream zos = new ZipOutputStream(baos);
+
+        for (Application app : applications) {
+            String studentName = app.getStudent().getName() + "_" + app.getStudent().getFirstName();
+            Long id = app.getId();
+
+            if (app.getCv() != null) {
+                ZipEntry cvEntry = new ZipEntry(studentName + "/CV_" + id + ".pdf");
+                zos.putNextEntry(cvEntry);
+                zos.write(app.getCv());
+                zos.closeEntry();
+            }
+
+            if (app.getCoverLetter() != null) {
+                ZipEntry clEntry = new ZipEntry(studentName + "/LettreMotivation_" + id + ".pdf");
+                zos.putNextEntry(clEntry);
+                zos.write(app.getCoverLetter());
+                zos.closeEntry();
+            }
+        }
+        zos.close();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"documents_liste_etudiants.zip\"")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(baos.toByteArray());
     }
 }

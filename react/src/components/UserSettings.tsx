@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { getUserEmail } from '../api/profileApi';
 import TeacherHeader from './teacher/TeacherHeader';
-import EnterpriseHeader from './entreprise/EnterpriseHeader';
-import EtudiantHeader from './EtudiantHeader';
+import EnterpriseHeader from './enterprise/EnterpriseHeader';
+import EtudiantHeader from './student/StudentHeader';
 import AdminHeader from './admin/AdminHeader';
 import PasswordVerification from './PasswordVerification';
 import UserSettingsModification from './UserSettingsModification';
@@ -41,10 +41,8 @@ const UserSettings: React.FC = () => {
     setShowPasswordVerification(true);
   };
 
-  const [verifiedPassword, setVerifiedPassword] = useState('');
 
-  const handlePasswordVerified = (password: string) => {
-    setVerifiedPassword(password);
+  const handlePasswordVerified = () => {
     setShowPasswordVerification(false);
     setShowModification(true);
   };
@@ -129,7 +127,6 @@ const UserSettings: React.FC = () => {
       {showModification && (
         <UserSettingsModification 
           currentEmail={userEmail}
-          verifiedPassword={verifiedPassword}
           onCancel={handleCancelModification} 
         />
       )}

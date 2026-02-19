@@ -52,6 +52,16 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
+    public List<Application> getApplicationsByStudentId(Long id) {
+        return applicationRepository.findAllByStudentId(id);
+    }
+
+    @Override
+    public List<Application> getApplicationsByStudentIds(List<Long> studentIds) {
+        return applicationRepository.findAllByStudentIdIn(studentIds);
+    }
+
+    @Override
     public void deleteApplicationRejected(Long id) {
         applicationRepository.deleteById(id);
     }

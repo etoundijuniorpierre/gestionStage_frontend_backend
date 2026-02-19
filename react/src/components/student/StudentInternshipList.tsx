@@ -1,43 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import EtudiantHeader from './EtudiantHeader';
-import egLogo from '../assets/eg-logo.jpg'; // à remplacer par tes assets réels
+import EtudiantHeader from './StudentHeader';
 
-import { getApprovedOffers, filterOffers } from '../api/studentApi';
-import type { OfferResponseDto } from '../types/offer';
-
-// Mock data au format backend (fallback si API vide)
-const mockOffers: OfferResponseDto[] = [
-  {
-    id: 1,
-    title: 'Implémentation du paiement en ligne',
-    description: 'Développement d’une solution de paiement en ligne pour EG store.',
-    domain: 'web dev',
-    startDate: '2025-06-10',
-    endDate: '2025-09-10',
-    status: 'Ouvert',
-    enterprise: {
-      id: 1,
-      name: 'EG store',
-      email: 'eg@store.com',
-      sectorOfActivity: 'Vente d’appareils',
-      matriculation: 'EG12345',
-      country: 'Nigeria',
-      city: 'Lagos',
-      hasLogo: { hasLogo: false },
-      inPartnership: true,
-    },
-    convention: undefined,
-    typeOfInternship: 'Perfectionnement',
-    job: 'Développeur',
-    requirements: 'Avoir un PC',
-    numberOfPlaces: '2',
-    durationOfInternship: 3,
-    paying: true,
-    remote: false,
-  },
-];
+import { getApprovedOffers, filterOffers } from '../../api/studentApi';
+import type { OfferResponseDto } from '../../types/offer';
 
 
 
@@ -108,25 +75,27 @@ export default function ListStagesEtudiant() {
   };
 
   // Fonction pour gérer les changements de filtres
-  const handleFilterChange = (filterType: string, value: any) => {
+  const handleFilterChange = (filterType: string, value: boolean | string | null) => {
     setFilters(prev => {
       const newFilters = { ...prev };
       
       if (filterType === 'remote' || filterType === 'onSite') {
-        newFilters[filterType] = value;
+        newFilters[filterType] = value as boolean;
       } else if (filterType === 'paying') {
-        newFilters.paying = value;
+        newFilters.paying = value as boolean | null;
       } else if (filterType === 'typeOfInternship') {
-        if (newFilters.typeOfInternship.includes(value)) {
-          newFilters.typeOfInternship = newFilters.typeOfInternship.filter(t => t !== value);
+        const strValue = value as string;
+        if (newFilters.typeOfInternship.includes(strValue)) {
+          newFilters.typeOfInternship = newFilters.typeOfInternship.filter(t => t !== strValue);
         } else {
-          newFilters.typeOfInternship = [...newFilters.typeOfInternship, value];
+          newFilters.typeOfInternship = [...newFilters.typeOfInternship, strValue];
         }
       } else if (filterType === 'status') {
-        if (newFilters.status.includes(value)) {
-          newFilters.status = newFilters.status.filter(s => s !== value);
+        const strValue = value as string;
+        if (newFilters.status.includes(strValue)) {
+          newFilters.status = newFilters.status.filter(s => s !== strValue);
         } else {
-          newFilters.status = [...newFilters.status, value];
+          newFilters.status = [...newFilters.status, strValue];
         }
       }
       
@@ -141,12 +110,11 @@ export default function ListStagesEtudiant() {
         const offersData = apiOffers || [];
         setOffers(offersData);
         setFilteredOffers(offersData); // Initialiser les offres filtrées
-      })
-      .catch(() => {
-        setOffers([]);
-        setFilteredOffers([]);
-      })
-      .finally(() => setLoading(false));
+        setLoading(false);
+      }).catch((res: { response?: { data?: { message?: string } } }) => {
+        console.error(res);
+        setLoading(false);
+      });
   }, []);
 
   // Appliquer les filtres quand ils changent
@@ -357,7 +325,7 @@ export default function ListStagesEtudiant() {
                   >
                   {/* Colonne gauche : logo, entreprise, pays, ville, secteur */}
                   <div className="flex flex-col items-center justify-center w-32 min-w-[175px] bg-[var(--color-light)] border-l-[var(--color-emraude)] p-3">
-                    <img src={egLogo} alt={offer.enterprise.name} className="h-12 w-12 rounded-full object-contain mb-2 border border-[#e1d3c1] bg-white" />
+                    <div className="h-12 w-12 rounded-full flex items-center justify-center bg-[var(--color-vert)] text-white font-bold text-lg mb-2 border border-[#e1d3c1]">{offer.enterprise.name.charAt(0)}</div>
                     <div className="text-xs text-[var(--color-dark)] font-semibold text-center">{offer.enterprise.name}</div>
                     <div className="text-[10px] text-[var(--color-dark)] mt-1">{offer.enterprise.country || 'Nigeria'} · {offer.enterprise.city || 'Lagos'}</div>
                     <div className="text-[10px] text-[var(--color-dark)] mt-1">{offer.enterprise.sectorOfActivity}</div>
@@ -397,3 +365,4 @@ export default function ListStagesEtudiant() {
     </div>
   );
 }
+

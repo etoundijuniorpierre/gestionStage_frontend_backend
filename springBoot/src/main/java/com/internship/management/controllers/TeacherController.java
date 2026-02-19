@@ -2,6 +2,7 @@ package com.internship.management.controllers;
 
 import com.internship.management.dto.InternshipStatDto;
 import com.internship.management.dto.StudentResponseDto;
+import com.internship.management.dto.application.ApplicationResponseDto;
 import com.internship.management.dto.postOffer.EnterpriseResponseDto;
 import com.internship.management.dto.postOffer.OfferValidationRequestDto;
 import com.internship.management.dto.postOffer.OfferResponseDto;
@@ -29,6 +30,7 @@ public class TeacherController {
     private final OfferService offerService;
     private final StudentService studentService;
     private final EnterpriseService enterpriseService;
+    private final ApplicationService applicationService;
     private final DtoMapper dtoMapper;
     private final NotificationInterface notificationInterface;
     private final ChartInterface chartInterface;
@@ -145,5 +147,11 @@ public class TeacherController {
 
         List<Enterprise> listOfEnterpriseInPartnership = enterpriseService.getEnterpriseByPartnershipTrue();
         return dtoMapper.toDtoEnterpriseList(listOfEnterpriseInPartnership);
+    }
+
+    @GetMapping("/student/{id}/applications")
+    public ResponseEntity<List<ApplicationResponseDto>> getStudentApplications(@PathVariable Long id) {
+        List<Application> applications = applicationService.getApplicationsByStudentId(id);
+        return ResponseEntity.ok(dtoMapper.toDtoApplicationList(applications));
     }
 }

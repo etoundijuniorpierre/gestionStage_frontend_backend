@@ -29,8 +29,9 @@ const PasswordVerification: React.FC<PasswordVerificationProps> = ({ onVerified,
     try {
       await verifyCurrentPassword(password);
       onVerified(password);
-    } catch (error: any) {
-      setError(error?.response?.data?.message || 'Mot de passe incorrect');
+    } catch (error: unknown) {
+      const err = error as { response?: { status?: number; data?: { message?: string } }; message?: string };
+      setError(err?.response?.data?.message || err?.message || 'Mot de passe incorrect');
     } finally {
       setLoading(false);
     }

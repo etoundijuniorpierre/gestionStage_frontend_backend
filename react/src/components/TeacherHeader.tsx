@@ -1,4 +1,4 @@
-import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import logo from '../assets/logo.png'; // Adapter le chemin si besoin
 import NotificationBell from './NotificationBell';
 
@@ -10,7 +10,6 @@ const navLinks = [
 ];
 
 export default function TeacherHeader() {
-  const location = useLocation();
   const navigate = useNavigate();
 
   const linkClass =

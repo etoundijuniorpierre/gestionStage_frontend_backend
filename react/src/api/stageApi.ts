@@ -54,17 +54,18 @@ export async function downloadConvention(offerId: number): Promise<Blob> {
       headers: getAuthHeaders()
     });
     return data;
-  } catch (error: any) {
-    if (error.response?.status === 404) {
+  } catch (error: unknown) {
+      const err = error as { response?: { status?: number; data?: { message?: string } }; message?: string };
+    if (err.response?.status === 404) {
       throw new Error('Convention non trouvée pour cette offre');
     }
-    if (error.response?.status === 401) {
+    if (err.response?.status === 401) {
       throw new Error('Session expirée. Veuillez vous reconnecter.');
     }
-    if (error.response?.status === 403) {
+    if (err.response?.status === 403) {
       throw new Error('Accès non autorisé à cette convention');
     }
-    throw new Error(error.response?.data?.message || 'Erreur lors du téléchargement de la convention');
+    throw new Error(err.response?.data?.message || 'Erreur lors du téléchargement de la convention');
   }
 }
 
@@ -99,23 +100,24 @@ export async function submitApplication(offerId: number, cvFile: File, coverLett
         // Ne pas définir Content-Type manuellement pour multipart/form-data
       },
     });
-  } catch (error: any) {
-    console.error('Application submission error:', error.response?.data || error.message);
-    if (error.response?.status === 400) {
-      throw new Error(error.response?.data || 'Données de candidature invalides');
+  } catch (error: unknown) {
+      const err = error as { response?: { status?: number; data?: { message?: string } }; message?: string };
+    console.error('Application submission error:', err.response?.data || err.message);
+    if (err.response?.status === 400) {
+      throw new Error(err.response?.data?.message || 'Données de candidature invalides');
     }
-    if (error.response?.status === 401) {
+    if (err.response?.status === 401) {
       throw new Error('Session expirée. Veuillez vous reconnecter.');
     }
-    if (error.response?.status === 403) {
+    if (err.response?.status === 403) {
       throw new Error('Vous ne pouvez plus candidater car vous êtes déjà en stage.');
     }
-    if (error.response?.status === 409) {
+    if (err.response?.status === 409) {
       throw new Error('Vous avez déjà postulé pour cette offre');
     }
-    if (error.response?.status === 500) {
-      throw new Error(error.response?.data || 'Erreur serveur lors de la soumission');
+    if (err.response?.status === 500) {
+      throw new Error(err.response?.data?.message || 'Erreur serveur lors de la soumission');
     }
-    throw new Error(error.response?.data || error.message || 'Erreur lors de la soumission de la candidature');
+    throw new Error(err.response?.data?.message || err.message || 'Erreur lors de la soumission de la candidature');
   }
 }

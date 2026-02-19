@@ -17,15 +17,16 @@ export const updatePassword = async (password: string) => {
       headers
     });
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
+      const err = error as { response?: { status?: number; data?: { message?: string } }; message?: string };
     console.error('Erreur updatePassword:', error);
-    console.error('Status:', error.response?.status);
-    console.error('Data:', error.response?.data);
+    console.error('Status:', err.response?.status);
+    console.error('Data:', err.response?.data);
     
-    if (error.response?.status === 401 || error.response?.status === 403) {
+    if (err.response?.status === 401 || err.response?.status === 403) {
       throw new Error('Session expirée. Veuillez vous reconnecter.');
     }
-    throw new Error(error.response?.data?.message || error.message || 'Erreur lors de la mise à jour du mot de passe');
+    throw new Error(err.response?.data?.message || err.message || 'Erreur lors de la mise à jour du mot de passe');
   }
 };
 
@@ -42,14 +43,15 @@ export const updateEmail = async (email: string) => {
     return await api.patch('/updateProfile/updateEmail', { email }, {
       headers: getAuthHeaders()
     });
-  } catch (error: any) {
-    if (error.response?.status === 409) {
+  } catch (error: unknown) {
+      const err = error as { response?: { status?: number; data?: { message?: string } }; message?: string };
+    if (err.response?.status === 409) {
       throw new Error('Cet email est déjà utilisé');
     }
-    if (error.response?.status === 401) {
+    if (err.response?.status === 401) {
       throw new Error('Session expirée. Veuillez vous reconnecter.');
     }
-    throw new Error(error.response?.data?.message || 'Erreur lors de la mise à jour de l\'email');
+    throw new Error(err.response?.data?.message || 'Erreur lors de la mise à jour de l\'email');
   }
 };
 
@@ -59,11 +61,12 @@ export const getUserEmail = async () => {
     return await api.get('/updateProfile/getUserEmail', {
       headers: getAuthHeaders()
     });
-  } catch (error: any) {
-    if (error.response?.status === 401) {
+  } catch (error: unknown) {
+      const err = error as { response?: { status?: number; data?: { message?: string } }; message?: string };
+    if (err.response?.status === 401) {
       throw new Error('Session expirée. Veuillez vous reconnecter.');
     }
-    throw new Error(error.response?.data?.message || 'Erreur lors de la récupération de l\'email');
+    throw new Error(err.response?.data?.message || 'Erreur lors de la récupération de l\'email');
   }
 };
 
@@ -73,14 +76,15 @@ export const deleteUserAccount = async () => {
     return await api.delete('/updateProfile/deleteUserAccount', {
       headers: getAuthHeaders()
     });
-  } catch (error: any) {
-    if (error.response?.status === 401) {
+  } catch (error: unknown) {
+      const err = error as { response?: { status?: number; data?: { message?: string } }; message?: string };
+    if (err.response?.status === 401) {
       throw new Error('Session expirée. Veuillez vous reconnecter.');
     }
-    if (error.response?.status === 403) {
+    if (err.response?.status === 403) {
       throw new Error('Opération non autorisée');
     }
-    throw new Error(error.response?.data?.message || 'Erreur lors de la suppression du compte');
+    throw new Error(err.response?.data?.message || 'Erreur lors de la suppression du compte');
   }
 };
 
@@ -93,13 +97,14 @@ export const verifyPassword = async (password: string) => {
     return await api.put('/updateProfile/verifyPassword', { password }, {
       headers: getAuthHeaders()
     });
-  } catch (error: any) {
-    if (error.response?.status === 401) {
+  } catch (error: unknown) {
+      const err = error as { response?: { status?: number; data?: { message?: string } }; message?: string };
+    if (err.response?.status === 401) {
       throw new Error('Mot de passe incorrect');
     }
-    if (error.response?.status === 403) {
+    if (err.response?.status === 403) {
       throw new Error('Session expirée. Veuillez vous reconnecter.');
     }
-    throw new Error(error.response?.data?.message || 'Erreur lors de la vérification du mot de passe');
+    throw new Error(err.response?.data?.message || 'Erreur lors de la vérification du mot de passe');
   }
 };

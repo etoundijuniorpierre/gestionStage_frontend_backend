@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import EntrepriseHeader from './entreprise/EnterpriseHeader';
-import { getEnterpriseOffers, downloadConvention, getEnterpriseLogo } from '../api/enterpriseApi';
+import EnterpriseHeader from './enterprise/EnterpriseHeader';
+import { getEnterpriseOffers, getEnterpriseLogo } from '../api/enterpriseApi';
+import { downloadConvention } from '../api/stageApi';
 import { useApplicationsStore } from '../store/applicationsStore';
 import type { OfferResponseDto } from '../types/offer';
 
@@ -18,9 +18,10 @@ const OfferDetail: React.FC = () => {
     if (!id) return;
     
     setLoading(true);
-    // Récupérer toutes les offres de l'entreprise et filtrer par ID
-    getEnterpriseOffers()
-      .then(response => {
+    const fetchOfferAndLogo = async () => {
+      try {
+        // Récupérer toutes les offres de l'entreprise et filtrer par ID
+        const response = await getEnterpriseOffers();
         const offers = response.data || [];
         const foundOffer = offers.find((offer: OfferResponseDto) => offer.id === parseInt(id));
         
@@ -28,26 +29,31 @@ const OfferDetail: React.FC = () => {
           setOffer(foundOffer);
           
           // Charger le logo si disponible
-          getEnterpriseLogo()
-            .then(logoResponse => {
-              if (logoResponse.data && logoResponse.data.size > 0) {
-                const logoBlob = new Blob([logoResponse.data]);
-                const logoObjectUrl = URL.createObjectURL(logoBlob);
-                setLogoUrl(logoObjectUrl);
-              }
-            })
-            .catch(() => setLogoUrl(null));
+          try {
+            const logoResponse = await getEnterpriseLogo();
+            if (logoResponse.data && logoResponse.data.size > 0) {
+              const logoBlob = logoResponse.data;
+              const logoObjectUrl = URL.createObjectURL(logoBlob);
+              setLogoUrl(logoObjectUrl);
+            } else {
+              setLogoUrl(null);
+            }
+          } catch {
+            console.log('Aucun logo disponible');
+            setLogoUrl(null);
+          }
         } else {
           setOffer(null);
         }
-      })
-      .catch(error => {
-        console.error('Erreur lors du chargement de l\'offre:', error);
+      } catch (err: unknown) {
+        console.error('Erreur lors du chargement de l\'offre:', err);
         setOffer(null);
-      })
-      .finally(() => {
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    fetchOfferAndLogo();
   }, [id]);
 
   const formatDate = (dateString: string) => {
@@ -67,8 +73,7 @@ const OfferDetail: React.FC = () => {
     if (!offer) return;
     
     try {
-      const response = await downloadConvention(offer.id);
-      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const blob = await downloadConvention(offer.id);
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -77,15 +82,15 @@ const OfferDetail: React.FC = () => {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Erreur lors du téléchargement:', error);
+    } catch (err: unknown) {
+      console.error('Erreur lors du téléchargement:', err);
     }
   };
 
   if (loading) {
     return (
       <div className="min-h-screen bg-login-gradient flex flex-col">
-        <EntrepriseHeader />
+        <EnterpriseHeader />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-[var(--color-light)] text-lg">Chargement...</div>
         </div>
@@ -96,7 +101,7 @@ const OfferDetail: React.FC = () => {
   if (!offer) {
     return (
       <div className="min-h-screen bg-login-gradient flex flex-col">
-        <EntrepriseHeader />
+        <EnterpriseHeader />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-[var(--color-light)] text-lg">Offre non trouvée</div>
         </div>
@@ -106,7 +111,7 @@ const OfferDetail: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-login-gradient flex flex-col">
-      <EntrepriseHeader />
+      <EnterpriseHeader />
       <main className="flex-1 px-4 py-8">
         <div className="max-w-4xl mx-auto">
           {/* Header avec flèche retour */}
@@ -175,13 +180,13 @@ const OfferDetail: React.FC = () => {
                   <h2 className="text-xl font-bold text-[#2d2d2d] mb-4">{offer.title}</h2>
                   <div className="flex gap-4">
                     <button 
-                      onClick={() => navigate('/entreprise/offres')}
+                      onClick={() => navigate('/enterprise/offres')}
                       className="flex-1 px-6 py-3 border border-gray-400 text-gray-600 rounded hover:bg-gray-50 transition-colors cursor-pointer"
                     >
                       Retour à la liste
                     </button>
                     <button 
-                      onClick={() => navigate('/entreprise/candidatures')}
+                      onClick={() => navigate('/enterprise/candidatures')}
                       className="flex-1 px-6 py-3 bg-[#4c7a4c] text-white rounded hover:bg-[#6a9a6a] transition-colors cursor-pointer"
                     >
                       Voir la liste des candidature

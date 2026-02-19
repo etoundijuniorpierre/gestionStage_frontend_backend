@@ -10,14 +10,15 @@ export const getAllStudents = async () => {
     return await api.get<StudentResponseDto[]>('/api/admin/allStudent', {
       headers: getAuthHeaders()
     });
-  } catch (error: any) {
-    if (error.response?.status === 401) {
+  } catch (error: unknown) {
+      const err = error as { response?: { status?: number; data?: { message?: string } }; message?: string };
+    if (err.response?.status === 401) {
       throw new Error('Session expirée. Veuillez vous reconnecter.');
     }
-    if (error.response?.status === 403) {
+    if (err.response?.status === 403) {
       throw new Error('Accès non autorisé. Droits administrateur requis.');
     }
-    throw new Error(error.response?.data?.message || 'Erreur lors de la récupération des étudiants');
+    throw new Error(err.response?.data?.message || 'Erreur lors de la récupération des étudiants');
   }
 };
 
@@ -49,10 +50,11 @@ export const deleteStudent = async (studentId: number) => {
       headers: getAuthHeaders(),
       params: { userId: studentId }
     });
-  } catch (error: any) {
-    if (error.response?.status === 403) {
+  } catch (error: unknown) {
+      const err = error as { response?: { status?: number; data?: { message?: string } }; message?: string };
+    if (err.response?.status === 403) {
       throw new Error('Droits insuffisants pour supprimer cet étudiant');
     }
-    throw new Error(error.response?.data?.message || 'Erreur lors de la suppression de l\'\u00e9tudiant');
+    throw new Error(err.response?.data?.message || 'Erreur lors de la suppression de l\'\u00e9tudiant');
   }
 };

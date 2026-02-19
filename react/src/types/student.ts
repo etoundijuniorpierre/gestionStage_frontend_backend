@@ -25,4 +25,8 @@ export interface StudentResponseDto {
   email: string;
   onInternship: boolean;
   department: string;
+  sector?: string;
+  languages?: string[];
+  githubLink?: string;
+  linkedinLink?: string;
 }

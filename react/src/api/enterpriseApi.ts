@@ -24,8 +24,9 @@ export const createOffer = async (offer: OfferRequestDto) => {
     return await api.post('/api/enterprise/createOffer', data, {
       headers: getAuthHeaders()
     });
-  } catch (error: any) {
-    if (error.response?.status === 403) {
+  } catch (error: unknown) {
+    const axiosError = error as { response?: { status?: number } };
+    if (axiosError.response?.status === 403) {
       throw new Error('Votre entreprise doit être approuvée comme partenaire pour créer des offres');
     }
     throw error;
@@ -114,46 +115,7 @@ export const validateApplication = async (applicationId: number, approved: boole
 
 
 
-// Télécharger la convention d'une offre
-export const downloadConvention = async (offerId: number) => {
-  if (!offerId || offerId <= 0) {
-    throw new Error('ID d\'offre invalide');
-  }
-  return await api.get(`/downloadFiles/downloadConvention/${offerId}`, { 
-    responseType: 'blob',
-    headers: getAuthHeaders()
-  });
-};
-
 // Note: getEnterpriseById n'existe pas dans le backend
-// Utiliser getPendingEnterprises ou getEnterpriseOffers selon le contexte
-
-// Fonction utilitaire pour récupérer une entreprise par ID (via les offres)
-export const getEnterpriseById = async (enterpriseId: number): Promise<{ data: EnterpriseResponseDto }> => {
-  if (!enterpriseId || enterpriseId <= 0) {
-    throw new Error('ID d\'entreprise invalide');
-  }
-  // Cette fonction n'est pas disponible dans le backend
-  // On tape volontairement une réponse typée pour ne pas casser le code appelant,
-  // mais on lance une erreur pour indiquer l'absence d'endpoint.
-  throw new Error('Endpoint non disponible - utiliser les endpoints spécifiques');
-};
-
-// Récupère les étudiants par département (pour les enseignants)
-export const getStudentsByDepartment = () =>
-  api.get('/api/teacher/listOfStudentByDepartment');
-
-// Télécharger le CV d'un étudiant (pour les enseignants)
-export const downloadStudentCV = async (studentId: number) => {
-  if (!studentId || studentId <= 0 || !Number.isInteger(studentId)) {
-    throw new Error('ID étudiant invalide');
-  }
-  const sanitizedId = Math.floor(Math.abs(studentId));
-  return await api.get(`/downloadFiles/cv/${sanitizedId}/download`, { 
-    responseType: 'blob',
-    headers: getAuthHeaders()
-  });
-};
 
 // === AJOUTS: Mocks pour la liste des entreprises et le logo par ID ===
 
@@ -204,7 +166,7 @@ export const getAllEnterprises = async () => {
 };
 
 // Récupère le logo d'une entreprise par ID (mock: blob vide pour ne pas casser l'UI)
-export const getEnterpriseLogoById = async (enterpriseId: number) => {
+export const getEnterpriseLogoById = async () => {
   try {
     // Exemple futur si le backend ajoute un endpoint:
     // return await api.get(`/profilePhoto/getEnterpriseLogo/${enterpriseId}`, { responseType: 'blob', headers: getAuthHeaders() });
@@ -219,11 +181,12 @@ export const getEnterpriseLogoById = async (enterpriseId: number) => {
 export const getCurrentEnterpriseInfo = async () => {
   try {
     return await api.get('/api/enterprise/info', { headers: getAuthHeaders() });
-  } catch (error: any) {
-    if (error.response?.status === 401) {
+  } catch (error: unknown) {
+    const axiosError = error as { response?: { status?: number; data?: { message?: string } } };
+    if (axiosError.response?.status === 401) {
       throw new Error('Session expirée. Veuillez vous reconnecter.');
     }
-    throw new Error(error.response?.data?.message || 'Erreur lors de la récupération des informations');
+    throw new Error(axiosError.response?.data?.message || 'Erreur lors de la récupération des informations');
   }
 };
 
@@ -250,5 +213,9 @@ export const updateLogo = async (enterpriseId: number, file: File) => {
   });
 };
 
-
-
+// Récupérer une entreprise par ID (fallback: cherche dans les listes cachées)
+export const getEnterpriseById = async (enterpriseId: number) => {
+  return await api.get(`/api/admin/enterprise/${enterpriseId}`, {
+    headers: getAuthHeaders()
+  });
+};

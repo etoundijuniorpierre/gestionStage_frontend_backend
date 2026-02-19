@@ -20,5 +20,9 @@ public interface ApplicationService {
 
     Application getApplicationByStudentOnInternshipTrue(Student student);
 
+    List<Application> getApplicationsByStudentId(Long id);
+
+    List<Application> getApplicationsByStudentIds(List<Long> studentIds);
+
     void deleteApplicationRejected(Long id);
 }

@@ -32,13 +32,14 @@ export const downloadConvention = async (offerId: number) => {
       responseType: 'blob',
       headers: getAuthHeaders()
     });
-  } catch (error: any) {
-    if (error.response?.status === 404) {
+  } catch (error: unknown) {
+      const err = error as { response?: { status?: number; data?: { message?: string } }; message?: string };
+    if (err.response?.status === 404) {
       throw new Error('Convention non trouvée pour cette offre');
     }
-    if (error.response?.status === 401) {
+    if (err.response?.status === 401) {
       throw new Error('Session expirée. Veuillez vous reconnecter.');
     }
-    throw new Error(error.response?.data?.message || 'Erreur lors du téléchargement de la convention');
+    throw new Error(err.response?.data?.message || 'Erreur lors du téléchargement de la convention');
   }
 };

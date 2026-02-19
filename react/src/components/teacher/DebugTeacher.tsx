@@ -1,8 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { getOffersToReviewByDepartment, getEnterpriseInPartnership, getStudentsByDepartment } from '../../api/teacherApi';
+import { getOffersToReviewByDepartment, getTeacherEnterpriseInPartnership, getStudentsByDepartment } from '../../api/teacherApi';
+
+type DebugData = {
+  offers?: unknown;
+  enterprises?: unknown;
+  students?: unknown;
+  error?: unknown;
+};
 
 const DebugTeacher: React.FC = () => {
-  const [debug, setDebug] = useState<any>({});
+  const [debug, setDebug] = useState<DebugData>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -13,7 +20,7 @@ const DebugTeacher: React.FC = () => {
         // Test des 3 endpoints principaux
         const [offersRes, enterprisesRes, studentsRes] = await Promise.allSettled([
           getOffersToReviewByDepartment(),
-          getEnterpriseInPartnership(),
+          getTeacherEnterpriseInPartnership(),
           getStudentsByDepartment()
         ]);
 
