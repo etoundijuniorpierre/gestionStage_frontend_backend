@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: internship-management-api
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    autoDeploy: true
+    healthCheckPath: /api/health
+    envVars:
+      - key: DB_URL
+        value: jdbc:postgresql://ep-restless-fire-akc5hcb9-pooler.c-3.us-west-2.aws.neon.tech/internship?user=neondb_owner&password=npg_aMk9Hj3QPsyY&sslmode=require&channelBinding=require
+      - key: DB_USERNAME
+        value: neondb_owner
+      - key: DB_PASSWORD
+        value: npg_aMk9Hj3QPsyY
+      - key: JWT_SECRET
+        generateValue: true
+      - key: MAIL_USERNAME
+        value: teamkf48inscription@gmail.com
+      - key: MAIL_PASSWORD
+        value: njdd ruhm daiw iwld
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod

@@ -1,0 +1,30 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "build"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ],
+  "git": {
+    "deploymentEnabled": true,
+    "productionBranch": "prod"
+  },
+  "env": {
+    "REACT_APP_API_URL": "@api_url"
+  },
+  "build": {
+    "env": {
+      "REACT_APP_API_URL": "@api_url"
+    }
+  }
+}
