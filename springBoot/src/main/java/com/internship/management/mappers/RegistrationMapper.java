@@ -51,4 +51,7 @@ public interface RegistrationMapper {
     @Mapping(target = "expirationDate", expression = "java(LocalDateTime.now().plusMinutes(EXPIRATION_MINUTES))")
     VerificationToken updateToken(@MappingTarget VerificationToken token, String newCode);
 
+    @Mapping(target = "status", source = "status")
+    UserResponseDto toDtoWithStatus(Users user);
+
 }

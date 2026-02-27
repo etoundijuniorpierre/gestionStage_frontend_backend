@@ -5,10 +5,12 @@ import com.internship.management.entities.*;
 import com.internship.management.mappers.RegistrationMapper;
 import com.internship.management.repositories.UsersRepository;
 import com.internship.management.repositories.VerificationTokenRepository;
+import com.internship.management.enums.UserStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Random;
@@ -27,6 +29,7 @@ public class VerificationTokenService {
         return String.valueOf(new Random().nextInt(90000) + 10000);
     }
 
+    @Transactional
     public void createAndSendToken(Users user) {
 
         String code = generateCode();
@@ -36,6 +39,7 @@ public class VerificationTokenService {
         sendEmail(user.getEmail(), code);
     }
 
+    @Transactional
     public void resendToken(Users user) {
         tokenRepository.deleteByUser(user);
         createAndSendToken(user);
@@ -70,6 +74,7 @@ public class VerificationTokenService {
         tokenRepository.save(token);
 
         user.setEmailVerified(true);
+        user.setStatus(UserStatus.ACTIF);
         return userRepository.save(user);
     }
 

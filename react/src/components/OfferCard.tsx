@@ -93,7 +93,7 @@ const OfferCard: React.FC<OfferCardProps> = ({ offer, onClick }) => {
           <div className="text-xs text-[var(--color-dark)] mb-1">Nombre de place: <b>{offer.numberOfPlaces || '1'}</b></div>
           <div className="text-xs text-[var(--color-dark)] mb-1">Nombre de postulants: <b>
             <button
-              onClick={(e) => { e.stopPropagation(); navigate('/enterprise/candidatures'); }}
+              onClick={(e) => { e.stopPropagation(); navigate('/entreprise/candidatures'); }}
               className="text-blue-600 hover:text-blue-800 underline font-medium cursor-pointer"
             >
               {getApplicationsCount(offer.id)}

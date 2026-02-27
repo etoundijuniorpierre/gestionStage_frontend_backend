@@ -2,6 +2,7 @@ import { api, getAuthHeaders } from './api';
 
 // Authentification
 import type { LoginRequest, ResetPasswordRequestDto } from '../types/auth';
+import type { UserStatusResponseDto } from '../types/userStatus';
 
 export const login = async (loginData: LoginRequest) => {
   try {
@@ -10,12 +11,22 @@ export const login = async (loginData: LoginRequest) => {
     }
     return await api.post('/login', loginData);
   } catch (error: unknown) {
-      const err = error as { response?: { status?: number; data?: { message?: string } }; message?: string; code?: string };
+      const err = error as { response?: { status?: number; data?: { message?: string; userStatus?: UserStatusResponseDto } }; message?: string; code?: string };
     if (err.response?.status === 401) {
       throw new Error('Email ou mot de passe incorrect');
     }
     if (err.response?.status === 403) {
       throw new Error('Compte non vérifié. Vérifiez votre email.');
+    }
+    // Gérer les comptes inactifs - retourner les données complètes
+    if (err.response?.status === 400 && err.response?.data?.userStatus) {
+      const userStatus = err.response.data.userStatus as UserStatusResponseDto;
+      if (userStatus.status === 'INACTIF') {
+        // Créer une erreur personnalisée avec les données du userStatus
+        const inactiveError = new Error(userStatus.message) as any;
+        inactiveError.userStatus = userStatus;
+        throw inactiveError;
+      }
     }
     if (err.code === 'NETWORK_ERROR') {
       throw new Error('Erreur de connexion. Vérifiez votre réseau.');

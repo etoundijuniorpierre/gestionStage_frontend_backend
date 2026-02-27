@@ -1,6 +1,7 @@
 package com.internship.management.entities;
 
 import com.internship.management.enums.Role;
+import com.internship.management.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -27,6 +28,9 @@ public class Users {
     private String email;
     private String password;
     private boolean emailVerified;
+
+    @Enumerated(EnumType.STRING)
+    private UserStatus status = UserStatus.INACTIF;
 
     private LocalDateTime createdAt;
 

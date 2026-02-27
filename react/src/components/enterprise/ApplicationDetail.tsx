@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { getEnterpriseApplications, downloadCandidateCV, downloadCandidateCoverLetter, validateApplication } from '../../api/enterpriseApi';
-import EnterpriseHeader from '../EnterpriseHeader';
+import EnterpriseHeader from './EnterpriseHeader';
+
 
 interface ApplicationDetail {
   id: number;
@@ -108,7 +109,7 @@ const ApplicationDetail: React.FC = () => {
       // Afficher un message de succès temporaire
       const message = approved ? 'Candidature acceptée avec succès!' : 'Candidature refusée.';
       alert(message);
-      navigate('/enterprise/candidatures');
+      navigate('/entreprise/candidatures');
     } catch (err: unknown) {
       console.error('Erreur lors de la validation:', err);
       const errorMessage = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Erreur lors de la validation de la candidature';
@@ -148,7 +149,7 @@ const ApplicationDetail: React.FC = () => {
           {/* Header avec bouton retour */}
           <div className="flex items-center mb-6">
             <button 
-              onClick={() => navigate('/enterprise/candidatures')}
+              onClick={() => navigate('/entreprise/candidatures')}
               className="mr-4 text-[#2d2d2d] hover:text-[#4c7a4c]"
             >
               <span className="text-2xl">←</span>

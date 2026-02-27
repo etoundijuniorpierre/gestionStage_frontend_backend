@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import TeacherHeader from './TeacherHeader';
 import AdminHeader from '../admin/AdminHeader';
 import { getOffersToReviewByDepartment, validateOfferAndConvention } from '../../api/teacherApi';
-import { downloadConvention } from '../../api/offerDetailApi';
+import { downloadConvention } from '../../api/stageApi';
 import { useLocation } from 'react-router-dom';
 import EnterpriseLogo from '../enterprise/EnterpriseLogo';
 import type { OfferResponseDto } from '../../types/offer';
@@ -98,9 +98,8 @@ const TeacherOfferDetail = () => {
     if (!id) return;
     
     try {
-      const response = await downloadConvention(Number(id));
+      const blob = await downloadConvention(Number(id));
       
-      const blob = new Blob([response.data], { type: 'application/pdf' });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;

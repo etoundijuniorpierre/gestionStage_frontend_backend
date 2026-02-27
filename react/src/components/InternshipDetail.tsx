@@ -6,6 +6,7 @@ import type { OfferResponseDto } from '../types/offer';
 import StudentHeader from './student/StudentHeader';
 import EnterpriseLogo from './enterprise/EnterpriseLogo';
 import { useStudentStatus } from '../hooks/useStudentStatus';
+
 import { validateApplicationEligibility, getApplicationButtonText, isApplicationButtonDisabled } from '../utils/applicationUtils';
 import ConfirmationModal from './admin/ConfirmationModal';
 

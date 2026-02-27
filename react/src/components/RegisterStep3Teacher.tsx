@@ -76,14 +76,14 @@ const RegisterStep3Teacher = ({ onPrev, onFinish }: Props) => {
         <div className="flex gap-2 w-full justify-between mt-4">
           <button
             type="button"
-            className=" border w-full border-[var(--color-vert)] text-[var(--color-light)] py-1 px-6 rounded transition-colors cursor-pointer"
+            className=" border w-full border-[var(--color-vert)] hover:bg-gray-300 hover:opacity-80 text-[var(--color-light)] hover:text-gray-800 py-1 px-6 rounded transition-all duration-200 cursor-pointer"
             onClick={onPrev}
           >
             Précédent
           </button>
           <button
             type="submit"
-            className="bg-[var(--color-vert)] w-full text-[var(--color-light)] py-1 px-6 rounded transition-colors disabled:opacity-50 cursor-pointer"
+            className="bg-[var(--color-vert)] w-full hover:bg-[#63d13e] hover:opacity-90 text-[var(--color-light)] hover:text-white py-1 px-6 rounded transition-all duration-200 disabled:opacity-50 cursor-pointer"
             disabled={!isValid}
           >
             Terminer

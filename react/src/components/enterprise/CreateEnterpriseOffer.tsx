@@ -81,7 +81,7 @@ const CreerOffreEntreprise: React.FC = () => {
         // Mode édition non supporté - les endpoints getEnterpriseInfo et getOfferById n'existent pas
         if (isEditing && id) {
           setError('La modification d\'offres n\'est pas disponible actuellement');
-          navigate('/enterprise/offres');
+          navigate('/entreprise/offres');
           return;
         }
       } catch (error) {
@@ -220,7 +220,7 @@ const CreerOffreEntreprise: React.FC = () => {
       }
       
       setSuccess(true);
-      setTimeout(() => navigate('/enterprise/offres'), 2000);
+      setTimeout(() => navigate('/entreprise/offres'), 2000);
     } catch (err: unknown) {
       // Éviter l'injection de logs - ne pas logger les données utilisateur
       const errorMessage = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Erreur lors de la création de l\'offre';

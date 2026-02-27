@@ -35,27 +35,33 @@ const LoginPage = () => {
   const onSubmit = async (data: LoginFormInputs) => {
     try {
       const response = await login(data);
-      console.log('Réponse login:', response.data);
       const { token, role } = response.data;
-      console.log('Token:', token);
-      console.log('Role:', role);
+      
+      console.log(`🔑 LoginPage: role=${role}, token=${!!token}`);
       
       if (token && role) {
         setAuth(token, role);
         clearError();
         
-        console.log('Redirection vers:', role);
-        // Redirection automatique selon le rôle
+        // Vérifier stockage
+        const storedRole = localStorage.getItem('role');
+        console.log(`💾 LoginPage: role stocké=${storedRole}`);
+        
+        // Redirection selon rôle
         if (role === 'STUDENT') {
+          console.log('🎯 LoginPage: STUDENT → /etudiant/stages');
           navigate('/etudiant/stages');
         } else if (role === 'TEACHER') {
+          console.log('🎯 LoginPage: TEACHER → /enseignant/offres');
           navigate('/enseignant/offres');
-        } else if (role === 'ENTERPRISE') {
-          navigate('/enterprise/offres');
+        } else if (role === 'ENTERPRISE' || role?.toUpperCase() === 'ENTERPRISE') {
+          console.log('🎯 LoginPage: ENTERPRISE → /entreprise/offres');
+          navigate('/entreprise/offres');
         } else if (role === 'ADMIN') {
+          console.log('🎯 LoginPage: ADMIN → /admin/dashboard');
           navigate('/admin/dashboard');
         } else {
-          console.log('Role non reconnu, redirection vers /');
+          console.log(`❌ LoginPage: Rôle non reconnu ${role} → /`);
           navigate('/');
         }
       } else {
@@ -64,16 +70,27 @@ const LoginPage = () => {
       }
     } catch (error) {
       console.log('Erreur login:', error);
-      setError('Identifiants incorrects');
+      const err = error as { message?: string; userStatus?: { email: string; status: string; message: string } };
+      
+      // Gérer les comptes inactifs - erreur personnalisée avec userStatus
+      if (err.userStatus?.status === 'INACTIF') {
+        setError(err.userStatus.message);
+        // Rediriger vers la page de vérification existante avec l'email et le message
+        setTimeout(() => {
+          navigate(`/verification?email=${encodeURIComponent(err.userStatus!.email)}&message=${encodeURIComponent(err.userStatus!.message)}`);
+        }, 2000);
+      } else {
+        setError('Identifiants incorrects');
+      }
     }
   };
 
   return (
     <div className="min-h-screen bg-login-gradient flex flex-col items-center justify-center px-4">
       {/* Logo */}
-      <div className="flex flex-col items-center mb-8">
+      <div className="flex flex-col items-center justify-center mb-20">
         <img src={logo} alt="Logo" className="max-w-[280px] w-full" />
-        <p className="text-[#e1d3c1] text-center space">ELITE</p>
+        <p className="text-[#e1d3c1] text-center text-5xl tracking-[0.8em] ml-[35px]">ELITE</p>
       </div>
 
       {/* Formulaire */}

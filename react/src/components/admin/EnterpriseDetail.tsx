@@ -3,7 +3,8 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import AdminHeader from './AdminHeader';
 import { approveEnterprise, deleteEnterprise } from '../../api/adminApi';
 import { getEnterpriseById } from '../../api/enterpriseApi';
-import type { EnterpriseResponseDto, offersResponseDto } from '../../types/enterprise';
+import type { EnterpriseResponseDto } from '../../types/enterprise';
+import type { OfferResponseDto } from '../../types/offer';
 import ConfirmationModal from './ConfirmationModal';
 
 const EnterpriseDetail: React.FC = () => {
@@ -185,7 +186,7 @@ const EnterpriseDetail: React.FC = () => {
                 <div className="bg-white rounded-lg shadow-md p-6 mb-6">
                   <h2 className="text-xl font-semibold mb-4">Offres de stage ({enterprise.offers.length})</h2>
                   <div className="flex flex-col gap-4">
-                    {enterprise.offers.map((offer: offersResponseDto) => (
+                    {enterprise.offers.map((offer: OfferResponseDto) => (
                       <div
                         key={offer.id}
                         className="flex flex-row items-stretch bg-[var(--color-light)] rounded-xl shadow-lg border border-[#e1d3c1] overflow-hidden hover:bg-[var(--color-light)] transition-colors cursor-pointer"

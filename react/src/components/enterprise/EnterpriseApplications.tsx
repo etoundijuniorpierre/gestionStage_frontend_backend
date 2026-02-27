@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getEnterpriseApplications, getEnterpriseOffers, downloadCandidateCV } from '../../api/enterpriseApi';
-import EnterpriseHeader from '../EnterpriseHeader';
+import EnterpriseHeader from './EnterpriseHeader';
+
 import type { OfferResponseDto } from '../../types/offer';
 
 interface Application {
@@ -115,7 +116,7 @@ const EnterpriseApplications: React.FC = () => {
               Vous devez d'abord créer une offre de stage pour pouvoir voir les candidatures.
             </p>
             <button
-              onClick={() => navigate('/enterprise/creer-offre')}
+              onClick={() => navigate('/entreprise/creer-offre')}
               className="bg-[#4c7a4c] text-white px-6 py-3 rounded hover:bg-[#6a9a6a] transition-colors"
             >
               Créer une offre
@@ -181,7 +182,7 @@ const EnterpriseApplications: React.FC = () => {
                       <div 
                         key={application.id} 
                         className="bg-white rounded-lg p-4 border border-[#d2bfa3] cursor-pointer hover:shadow-lg transition-shadow"
-                        onClick={() => navigate(`/enterprise/candidatures/${application.id}`, { state: { application } })}
+                        onClick={() => navigate(`/entreprise/candidatures/${application.id}`, { state: { application } })}
                       >
                         <div className="flex items-start gap-4">
                           {/* Avatar avec initiales */}

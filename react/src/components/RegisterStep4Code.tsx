@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { verifyEmail, resendToken } from '../api/registrationApi';
 import { useRegistrationStore } from '../store/registrationStore';
 
@@ -14,6 +14,11 @@ interface RegisterStep4CodeProps {
 
 const RegisterStep4Code = ({ email }: RegisterStep4CodeProps) => {
   const { setStep, reset } = useRegistrationStore();
+  const [searchParams] = useSearchParams();
+
+  // Utiliser l'email des props ou des paramètres d'URL
+  const emailFromUrl = searchParams.get('email');
+  const finalEmail = email || emailFromUrl || '';
 
   const [code, setCode] = useState<string[]>(Array(CODE_LENGTH).fill(''));
   const [submitted, setSubmitted] = useState(false);
@@ -66,7 +71,7 @@ const RegisterStep4Code = ({ email }: RegisterStep4CodeProps) => {
     setError('');
     setLoading(true);
     try {
-      await verifyEmail({ email: email ?? '', token: code.join('') });
+      await verifyEmail({ email: finalEmail, token: code.join('') });
       setSubmitted(true);
       setTimeout(() => {
         reset();
@@ -81,12 +86,12 @@ const RegisterStep4Code = ({ email }: RegisterStep4CodeProps) => {
   };
 
   const handleResendCode = async () => {
-    if (!email || resendCooldown > 0) return;
+    if (!finalEmail || resendCooldown > 0) return;
     
     setResendLoading(true);
     setError('');
     try {
-      await resendToken(email);
+      await resendToken(finalEmail);
       setResendSuccess(true);
       setResendCooldown(60);
       
@@ -111,7 +116,7 @@ const RegisterStep4Code = ({ email }: RegisterStep4CodeProps) => {
   return (
     <form className="w-ful text-white flex flex-col items-start" onSubmit={handleSubmit}>
       <p className="text-white">Un code a été envoyé à l'adresse suivante&nbsp;</p>
-      <p className="font-semibold">{email}</p><br/>
+      <p className="font-semibold">{finalEmail}</p><br/>
       <p>Veuillez l'insérer ci-dessous.</p><br/>
       <div className="w-full flex justify-between mb-2">
         {code.map((value, idx) => (
@@ -153,7 +158,7 @@ const RegisterStep4Code = ({ email }: RegisterStep4CodeProps) => {
       <div className="flex w-full justify-between gap-2 mt-4">
         <button
           type="button"
-          className=" border border-[#58693e] text-[var(--color-light)] w-full py-1 px-6 rounded transition-colors"
+          className=" border border-[#58693e] hover:bg-gray-300 hover:opacity-80 text-[var(--color-light)] hover:text-gray-800 w-full py-1 px-6 rounded transition-all duration-200"
           onClick={() => { reset(); setStep(1); }}
           disabled={loading}
         >
@@ -161,7 +166,7 @@ const RegisterStep4Code = ({ email }: RegisterStep4CodeProps) => {
         </button>
         <button
           type="submit"
-          className="bg-[var(--color-vert)] text-[var(--color-light)] w-full py-1 px-6 rounded transition-colors disabled:opacity-50 cursor-pointer "
+          className="bg-[var(--color-vert)] hover:bg-[#63d13e] hover:opacity-90 text-[var(--color-light)] hover:text-white w-full py-1 px-6 rounded transition-all duration-200 disabled:opacity-50 cursor-pointer "
           disabled={!isComplete || loading}
         >
           {loading ? 'Vérification...' : 'Valider'}

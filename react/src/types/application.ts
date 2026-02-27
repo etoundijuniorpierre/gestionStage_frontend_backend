@@ -1,3 +1,5 @@
+import type { StudentApplicationDto } from './student';
+
 export interface ApplicationResponseDto {
   id: number;
   state: string;
@@ -17,12 +19,6 @@ export interface ApplicationOfferDto {
   title: string;
   domain: string;
   description: string;
-}
-
-export interface StudentApplicationDto {
-  name: string;
-  firstName: string;
-  email: string;
 }
 
 export interface HasFilesDto {

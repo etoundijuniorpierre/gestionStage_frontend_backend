@@ -1,11 +1,9 @@
-version: '3.8'
-
 services:
   db:
     image: postgres:15-alpine
-    container_name: internship-db
+    container_name: internship
     environment:
-      POSTGRES_DB: internship
+      POSTGRES_DB: internshipDB
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: root
     ports:
@@ -21,14 +19,15 @@ services:
       dockerfile: Dockerfile
     container_name: internship-backend
     ports:
-      - "7070:8080"
+      - "7070:9080"
     environment:
       DB_URL: jdbc:postgresql://db:5432/internship
       DB_USERNAME: postgres
       DB_PASSWORD: root
       JWT_SECRET: a8f0c92b5efb45779a72ef1b8d9d648f7e9c0b4c2038e7b7ff4030201aeccbed
-      MAIL_USERNAME: ${MAIL_USERNAME}
-      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      ALLOWED_ORIGINS: http://localhost:7070,http://127.0.0.1:7070,http://localhost:6060,http://127.0.0.1:6060
+      MAIL_USERNAME: teamkf48inscription@gmail.com
+      MAIL_PASSWORD: njdd ruhm daiw iwld
     depends_on:
       - db
     networks:

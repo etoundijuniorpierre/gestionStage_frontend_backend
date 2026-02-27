@@ -1,5 +1,7 @@
 import { api, getAuthHeaders } from './api';
 import type { EnterpriseResponseDto } from '../types/enterprise';
+import type { StudentResponseDto } from '../types/student';
+
 
 // Récupérer les entreprises en attente de validation
 export const getPendingEnterprises = async () => {
@@ -79,4 +81,14 @@ export const deleteStudent = async (studentId: number) => {
   return api.delete(`/updateProfile/deleteAccount/${studentId}`, {
     headers: getAuthHeaders()
   });
+};
+
+// Récupérer un étudiant par ID (admin)
+export const getStudentById = async (id: number): Promise<StudentResponseDto | null> => {
+  if (!Number.isInteger(id) || id <= 0) {
+    throw new Error('ID étudiant invalide');
+  }
+  const response = await getAllStudents();
+  const students = response.data as StudentResponseDto[];
+  return students.find((student: StudentResponseDto) => student.id === id) || null;
 };

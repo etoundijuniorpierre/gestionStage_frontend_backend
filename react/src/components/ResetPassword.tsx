@@ -102,9 +102,9 @@ const ResetPassword = () => {
   return (
     <div className="min-h-screen bg-login-gradient">
       {/* Logo */}
-      <div className='flex flex-col justify-center mb-16 pt-8'>
-        <img src={logo} alt="Logo" className="max-w-[350px] mx-auto" />
-        <p className='text-[#e1d3c1] text-center mx-auto'>ELITE</p>
+      <div className="flex flex-col items-center justify-center mb-20">
+        <img src={logo} alt="Logo" className="max-w-[280px] w-full" />
+        <p className="text-[#e1d3c1] text-center text-5xl tracking-[0.8em] ml-[35px]">ELITE</p>
       </div>
 
       {/* Formulaire */}

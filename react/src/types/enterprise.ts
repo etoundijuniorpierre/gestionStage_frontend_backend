@@ -1,3 +1,5 @@
+import type { OfferResponseDto } from './offer';
+
 // Interface générée à partir du DTO backend EnterpriseRegistrationRequestDto
 export interface EnterpriseRegistrationRequestDto {
   name: string;
@@ -28,19 +30,5 @@ export interface EnterpriseResponseDto {
   city?: string;
   contact?: string;
   location?: string;
-  offers?: offersResponseDto[];
-}
-
-export interface offersResponseDto {
-  id: number;
-  title: string;
-  description: string;
-  domain: string;
-  job?: string;
-  typeOfInternship?: string;
-  startDate: string;
-  endDate: string;
-  numberOfPlaces?: number;
-  paying?: boolean;
-  remote?: boolean;
+  offers?: OfferResponseDto[];
 }

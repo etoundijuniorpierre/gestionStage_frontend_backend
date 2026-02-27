@@ -1,11 +1,6 @@
 import { create } from 'zustand';
 import { getUnseenNotifications, markNotificationAsSeen } from '../api/notificationApi';
-
-type NotificationDto = {
-  id: number;
-  message: string;
-  createdAt: string;
-};
+import type { NotificationDto } from '../types/notification';
 
 interface NotificationStore {
   notifications: NotificationDto[];
@@ -36,7 +31,7 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
         loading: false 
       });
     } catch (error: unknown) {
-      const err = error as { response?: { status?: number; data?: { message?: string } }; message?: string };
+      const err = error as { message?: string };
       set({ 
         error: err.message || 'Erreur lors du chargement des notifications',
         loading: false 
@@ -45,22 +40,16 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
   },
 
   markAsSeen: async (id: number) => {
-    console.log('=== MARQUAGE NOTIFICATION ===');
-    console.log('ID notification:', id);
     try {
-      const response = await markNotificationAsSeen(id);
-      console.log('Réponse API:', response);
+      await markNotificationAsSeen(id);
       const { notifications } = get();
-      console.log('Notifications avant filtrage:', notifications);
       const updatedNotifications = notifications.filter(n => n.id !== id);
-      console.log('Notifications après filtrage:', updatedNotifications);
       set({ 
         notifications: updatedNotifications,
         unreadCount: updatedNotifications.length 
       });
     } catch (error: unknown) {
-      const err = error as { response?: { status?: number; data?: { message?: string } }; message?: string };
-      console.error('Erreur marquage notification:', error);
+      const err = error as { message?: string };
       set({ error: err.message || 'Erreur lors du marquage de la notification' });
     }
   },

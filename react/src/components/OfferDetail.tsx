@@ -180,13 +180,13 @@ const OfferDetail: React.FC = () => {
                   <h2 className="text-xl font-bold text-[#2d2d2d] mb-4">{offer.title}</h2>
                   <div className="flex gap-4">
                     <button 
-                      onClick={() => navigate('/enterprise/offres')}
+                      onClick={() => navigate('/entreprise/offres')}
                       className="flex-1 px-6 py-3 border border-gray-400 text-gray-600 rounded hover:bg-gray-50 transition-colors cursor-pointer"
                     >
                       Retour à la liste
                     </button>
                     <button 
-                      onClick={() => navigate('/enterprise/candidatures')}
+                      onClick={() => navigate('/entreprise/candidatures')}
                       className="flex-1 px-6 py-3 bg-[#4c7a4c] text-white rounded hover:bg-[#6a9a6a] transition-colors cursor-pointer"
                     >
                       Voir la liste des candidature

@@ -50,18 +50,8 @@ export const useAuthStore = create<AuthState>((set) => ({
 if (typeof window !== 'undefined') {
   window.addEventListener('storage', (event) => {
     if (event.key === 'token' || event.key === 'role') {
-      const token = localStorage.getItem('token');
-      const role = localStorage.getItem('role');
-      useAuthStore.setState({ token, role });
+      const { sync } = useAuthStore.getState();
+      sync();
     }
-  });
-}
-
-
-// Listen to storage events for multi-tab sync
-type WindowWithAddEventListener = Window & typeof globalThis;
-if (typeof window !== 'undefined') {
-  (window as WindowWithAddEventListener).addEventListener('storage', () => {
-    useAuthStore.getState().sync();
   });
 }

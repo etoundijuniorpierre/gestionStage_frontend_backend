@@ -73,6 +73,13 @@ const RegisterStepper = () => {
         setStep(4);
       } catch (error) {
         console.error('Erreur lors de l\'inscription:', error);
+        const err = error as { message?: string; userStatus?: { email: string; status: string; message: string } };
+        
+        // Gérer les comptes existants inactifs - erreur personnalisée avec userStatus
+        if (err.userStatus?.status === 'INACTIF') {
+          navigate(`/verification?email=${encodeURIComponent(err.userStatus.email)}&message=${encodeURIComponent(err.userStatus.message)}`);
+        }
+        // Le reste des erreurs est géré par les composants individuels
       } finally {
         setRegisterLoading(false);
       }
@@ -115,11 +122,11 @@ const RegisterStepper = () => {
 
   return (
     <div className="min-h-screen flex flex-col justify-center items-center bg-login-gradient">
-      <div className='flex flex-col justify-center py-4 '>
-        <img src={logo} alt="Logo" className="max-w-[300px] mx-auto " />
-        {/* <p className='text-[#e1d3c1] text-center mx-auto space'>ELITE</p> */}
+      <div className="flex flex-col items-center justify-center mb-2">
+        <img src={logo} alt="Logo" className="max-w-[280px] w-full" />
+        <p className="text-[#e1d3c1] text-center text-5xl tracking-[0.8em] ml-[35px]">ELITE</p>
       </div>
-      <h1 className="text-[#b79056] mt-4 text-center mx-auto text-2xl">INSCRIPTION</h1><br/>
+      <h1 className="text-[#b79056] mb-[-20px] mt-2 text-center mx-auto text-2xl">INSCRIPTION</h1><br/>
       <div className="w-full max-w-[380px] border border-[3px] p-4 border-[#B79056]">
         {registerLoading && <div className="text-center py-2 text-gray-700">Inscription en cours...</div>}
         <AnimatePresence mode="wait" initial={false}>

@@ -1,5 +1,6 @@
 package com.internship.management.dto;
 
+import com.internship.management.enums.UserStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,4 +16,5 @@ public class UserResponseDto {
     private String email;
     private String role;
     private boolean emailVerified;
+    private UserStatus status;
 }

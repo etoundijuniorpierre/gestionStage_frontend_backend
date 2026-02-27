@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { getEnterpriseOffers, getEnterpriseApplications } from '../../api/enterpriseApi';
 import { useApplicationsStore } from '../../store/applicationsStore';
 import type { OfferResponseDto } from '../../types/offer';
-import EnterpriseHeader from '../EnterpriseHeader';
+import EnterpriseHeader from './EnterpriseHeader';
+
 import OfferCard from '../OfferCard';
 
 const EnterpriseOfferList: React.FC = () => {
@@ -53,7 +54,7 @@ const EnterpriseOfferList: React.FC = () => {
   }, [setApplicationsCount]);
 
   const handleCreateOffer = () => {
-    navigate('/enterprise/creer-offre');
+    navigate('/entreprise/creer-offre');
   };
 
   // Recherche sur le titre ou le domaine
@@ -126,7 +127,7 @@ const EnterpriseOfferList: React.FC = () => {
                 <OfferCard
                   key={offer.id}
                   offer={offer}
-                  onClick={() => navigate(`/enterprise/offres/${offer.id}`)}
+                  onClick={() => navigate(`/entreprise/offres/${offer.id}`)}
                 />
               ))}
             </div>

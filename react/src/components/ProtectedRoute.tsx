@@ -9,16 +9,25 @@ interface ProtectedRouteProps {
 export default function ProtectedRoute({ allowedRoles, redirectTo = '/login' }: ProtectedRouteProps) {
   const { token, role } = useAuthStore();
 
+  // Normalisation plus robuste du rôle
+  const normalizedRole = (role || '').trim().toUpperCase();
+  const normalizedAllowedRoles = allowedRoles?.map(r => (r || '').trim().toUpperCase()) || [];
+
+  console.log(`🔒 ProtectedRoute: role brut="${role}", normalized="${normalizedRole}"`);
+  console.log(`🔒 ProtectedRoute: allowed=${allowedRoles}, normalizedAllowed=${normalizedAllowedRoles}`);
+  console.log(`🔒 ProtectedRoute: token=${!!token}`);
+  console.log(`🔒 ProtectedRoute: includes check=${normalizedAllowedRoles.includes(normalizedRole)}`);
+
   if (!token) {
-    // Pas connecté
+    console.log('🔒 ProtectedRoute: Pas de token → redirection vers login');
     return <Navigate to={redirectTo} replace />;
   }
 
-  if (allowedRoles && !allowedRoles.includes((role || '').toUpperCase())) {
-    // Connecté mais pas le bon rôle
+  if (allowedRoles && !normalizedAllowedRoles.includes(normalizedRole)) {
+    console.log(`🔒 ProtectedRoute: Rôle "${normalizedRole}" non autorisé pour [${normalizedAllowedRoles.join(', ')}] → redirection vers /`);
     return <Navigate to="/" replace />;
   }
 
-  // Autorisé
+  console.log(`✅ ProtectedRoute: Accès autorisé pour rôle "${normalizedRole}"`);
   return <Outlet />;
-} 
+}

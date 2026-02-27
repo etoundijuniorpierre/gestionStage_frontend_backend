@@ -1,6 +1,6 @@
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import RegisterProgress from './RegisterProgress';
-
 import { useRegistrationStore } from '../store/registrationStore';
 
 export interface EnterpriseFormData {
@@ -39,6 +39,13 @@ const RegisterStep3Enterprise = ({ onPrev, onFinish }: Props) => {
     },
   });
 
+  // S'assurer que l'email est bien enregistré dans RHF (champ readOnly)
+  useEffect(() => {
+    if (formData.email) {
+      setValue('email', formData.email, { shouldValidate: true });
+    }
+  }, [formData.email, setValue]);
+
   const onSubmit = (data: EnterpriseFormData) => {
     onFinish(data);
   };
@@ -71,9 +78,8 @@ const RegisterStep3Enterprise = ({ onPrev, onFinish }: Props) => {
         <input
           id="email"
           type="email"
-          className="w-full mb-4 text-center rounded bg-[#e1d3c1] focus:outline-none"
+          className="w-full mb-4 text-center rounded bg-[#e1d3c1] focus:outline-none opacity-70 cursor-not-allowed"
           {...register('email')}
-          value={formData.email || ''}
           readOnly
         />
         {/* Pas de message d'erreur pour email readonly */}
@@ -149,17 +155,17 @@ const RegisterStep3Enterprise = ({ onPrev, onFinish }: Props) => {
         <div className="flex gap-2 w-full justify-between mt-4">
           <button
             type="button"
-            className="border border-[var(--color-vert)] text-[var(--color-light)] py-1 px-6 rounded transition-colors w-full cursor-pointer"
+            className="border border-[var(--color-vert)] hover:bg-gray-300 hover:opacity-80 text-[var(--color-light)] hover:text-gray-800 py-1 px-6 rounded transition-all duration-200 w-full cursor-pointer"
             onClick={onPrev}
           >
             Précédent
           </button>
           <button
             type="submit"
-            className="bg-[var(--color-vert)] text-[var(--color-light)] py-1 px-6 rounded transition-colors w-full cursor-pointer"
+            className="bg-[var(--color-vert)] hover:bg-[#63d13e] hover:opacity-90 text-[var(--color-light)] hover:text-white py-1 px-6 rounded transition-all duration-200 w-full cursor-pointer disabled:opacity-50"
             disabled={!isValid}
           >
-            Finish
+            Terminer
           </button>
         </div>
       </form>

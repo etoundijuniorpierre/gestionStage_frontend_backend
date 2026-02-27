@@ -32,6 +32,23 @@ public class registrationController {
     @PostMapping("/registerEnterprise")
     public ResponseEntity<String> create(@Valid @ModelAttribute EnterpriseRegistrationRequestDto enterpriseRequestDto) throws IOException {
 
+        // Vérifier si l'utilisateur existe déjà
+        Users existingUser = internshipService.getUserByEmail(enterpriseRequestDto.getEmail());
+        if (existingUser != null) {
+            if (existingUser.getStatus() == com.internship.management.enums.UserStatus.INACTIF) {
+                // Renvoyer un token et message approprié
+                verificationTokenService.createAndSendToken(existingUser);
+                return ResponseEntity.badRequest().body(
+                    "An account with this email already exists but is inactive. " +
+                    "A new verification code has been sent to your email. " +
+                    "Please check your emails to activate your account. " +
+                    "If this is not your account, please create a new one with a different email address."
+                );
+            } else {
+                return ResponseEntity.badRequest().body("User with email " + enterpriseRequestDto.getEmail() + " already exists");
+            }
+        }
+
         Enterprise toEnterpriseEntity = registrationMapper.toEntity(enterpriseRequestDto,passwordEncoder);
 
         if (enterpriseRequestDto.getLogo() != null && !enterpriseRequestDto.getLogo().isEmpty()) {
@@ -51,6 +68,23 @@ public class registrationController {
     @PostMapping("/registerStudent")
     public ResponseEntity<String> create(@Valid @RequestBody StudentRegistrationRequestDto studentRequestDto) {
 
+        // Vérifier si l'utilisateur existe déjà
+        Users existingUser = internshipService.getUserByEmail(studentRequestDto.getEmail());
+        if (existingUser != null) {
+            if (existingUser.getStatus() == com.internship.management.enums.UserStatus.INACTIF) {
+                // Renvoyer un token et message approprié
+                verificationTokenService.createAndSendToken(existingUser);
+                return ResponseEntity.badRequest().body(
+                    "An account with this email already exists but is inactive. " +
+                    "A new verification code has been sent to your email. " +
+                    "Please check your emails to activate your account. " +
+                    "If this is not your account, please create a new one with a different email address."
+                );
+            } else {
+                return ResponseEntity.badRequest().body("User with email " + studentRequestDto.getEmail() + " already exists");
+            }
+        }
+
         Student toStudentEntity = registrationMapper.toEntity(studentRequestDto, passwordEncoder);
         internshipService.registerStudent(toStudentEntity);
 
@@ -59,6 +93,23 @@ public class registrationController {
 
     @PostMapping("/registerTeacher")
     public ResponseEntity<String> create(@Valid @RequestBody TeacherRegistrationRequestDto teacherRequestDto) {
+
+        // Vérifier si l'utilisateur existe déjà
+        Users existingUser = internshipService.getUserByEmail(teacherRequestDto.getEmail());
+        if (existingUser != null) {
+            if (existingUser.getStatus() == com.internship.management.enums.UserStatus.INACTIF) {
+                // Renvoyer un token et message approprié
+                verificationTokenService.createAndSendToken(existingUser);
+                return ResponseEntity.badRequest().body(
+                    "An account with this email already exists but is inactive. " +
+                    "A new verification code has been sent to your email. " +
+                    "Please check your emails to activate your account. " +
+                    "If this is not your account, please create a new one with a different email address."
+                );
+            } else {
+                return ResponseEntity.badRequest().body("User with email " + teacherRequestDto.getEmail() + " already exists");
+            }
+        }
 
         Teacher toTeacherEntity = registrationMapper.toEntity(teacherRequestDto, passwordEncoder);
         internshipService.registerTeacher(toTeacherEntity);
@@ -85,16 +136,7 @@ public class registrationController {
 
         Users userVerified = verificationTokenService.verifyCode(request.getEmail(), request.getToken());
 
-        UserResponseDto dto;
-        if (userVerified instanceof Student student) {
-            dto = registrationMapper.toDto(student);
-        } else if (userVerified instanceof Enterprise enterprise) {
-            dto = registrationMapper.toDto(enterprise);
-        } else if (userVerified instanceof Teacher teacher) {
-            dto = registrationMapper.toDto(teacher);
-        } else {
-            throw new RuntimeException("Unknown user type");
-        }
+        UserResponseDto dto = registrationMapper.toDtoWithStatus(userVerified);
 
         return ResponseEntity.ok(dto);
     }

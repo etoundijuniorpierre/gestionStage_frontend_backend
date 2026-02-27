@@ -8,6 +8,7 @@ import { useRegistrationStore } from '../store/registrationStore';
 
 const RegisterStep1 = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
   const { formData, setFormData, setStep } = useRegistrationStore();
   const { register, handleSubmit, watch, formState: { errors, isValid } } = useForm<{
@@ -33,10 +34,6 @@ const RegisterStep1 = () => {
     <div>
       <form className="w-full flex flex-col" onSubmit={handleSubmit(onSubmit)}>
         {/* Email */}
-        {/* <label htmlFor="email" className="text-gray-700 font-medium mb-1 flex items-center gap-2">
-          <FiMail className="text-xl text-gray-400" />
-          Email
-        </label> */}
         <label className="flex justify-between items-center text-[#e2e2e2] mb-1" htmlFor="email">
             <span>Email</span>
             <FiMail className="text-xl" />
@@ -63,7 +60,7 @@ const RegisterStep1 = () => {
               type="button"
               tabIndex={-1}
               className="focus:outline-none cursor-pointer"
-              onClick={() => setShowPassword((v) => !v)}
+              onClick={() => setShowPassword(!showPassword)}
             >
               {showPassword ? <FiEyeOff className="text-xl" /> : <FiEye className="text-xl" />}
             </button>
@@ -71,7 +68,7 @@ const RegisterStep1 = () => {
         </label>
         <input
           id="password"
-          type="password"
+          type={showPassword ? 'text' : 'password'}
           autoComplete="new-password"
           placeholder="-"
           className="w-full mb-2 border text-center border-gray-300 bg-[#e1d3c1] rounded focus:outline-none"
@@ -92,14 +89,14 @@ const RegisterStep1 = () => {
               type="button"
               tabIndex={-1}
               className="focus:outline-none cursor-pointer"
-              onClick={() => setShowPassword((v) => !v)}
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
             >
-              {showPassword ? <FiEyeOff className="text-xl" /> : <FiEye className="text-xl" />}
+              {showConfirmPassword ? <FiEyeOff className="text-xl" /> : <FiEye className="text-xl" />}
             </button>
         </label>
         <input
           id="confirmPassword"
-          type="password"
+          type={showConfirmPassword ? 'text' : 'password'}
           autoComplete="new-password"
           placeholder="-"
           className="w-full mb-2 border text-center border-gray-300 bg-[#e1d3c1] rounded focus:outline-none"
@@ -112,7 +109,7 @@ const RegisterStep1 = () => {
 
         <button
           type="submit"
-          className="w-full bg-[var(--color-vert)] cursor-pointer text-white font-semibold py-1 mt-8 rounded transition-colors disabled:opacity-50"
+          className="w-full hover:bg-[#63d13e] hover:opacity-90 border border-[var(--color-vert)] text-[var(--color-light)] hover:text-white font-semibold py-1 mt-8 rounded transition-all duration-200 disabled:opacity-50"
           disabled={!isValid}
         >
           Suivant

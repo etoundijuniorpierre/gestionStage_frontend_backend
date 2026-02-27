@@ -20,4 +20,5 @@ export interface UserResponseDto {
   email: string;
   role: string;
   emailVerified: boolean;
+  status?: string;
 }
