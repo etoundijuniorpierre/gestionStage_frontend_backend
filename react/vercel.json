@@ -20,11 +20,11 @@
     "productionBranch": "prod"
   },
   "env": {
-    "REACT_APP_API_URL": "@api_url"
+    "REACT_APP_API_URL": "https://gestionstage-frontend-backend.onrender.com"
   },
   "build": {
     "env": {
-      "REACT_APP_API_URL": "@api_url"
+      "REACT_APP_API_URL": "https://gestionstage-frontend-backend.onrender.com"
     }
   }
 }
