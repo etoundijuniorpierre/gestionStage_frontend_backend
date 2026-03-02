@@ -22,7 +22,6 @@ import RegisterSuccess from './components/RegisterSuccess';
 import VerificationPage from './components/VerificationPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import InternshipDetail from './components/InternshipDetail';
-import RoleRedirector from './components/RoleRedirector';
 import UserSettings from './components/UserSettings';
 import AdminDashboard from './components/admin/AdminDashboard';
 import AdminEnterprisesList from './components/admin/EnterprisesList';
