@@ -30,13 +30,13 @@ Application frontend React pour la gestion de stages, déployée sur Vercel avec
 ### Configuration de production
 - **URL** : `https://your-app.vercel.app`
 - **Branche** : `prod`
-- **API Backend** : `https://internship-management-api.onrender.com/api`
+- **API Backend** : `https://gestionstage-frontend-backend.onrender.com/api`
 - **Build** : Automatique sur push vers `prod`
 
 ### Variables d'environnement (Production)
 ```bash
 # URL de l'API backend
-REACT_APP_API_URL=https://internship-management-api.onrender.com/api
+VITE_API_URL=https://gestionstage-frontend-backend.onrender.com/api
 
 # Autres variables (si nécessaires)
 REACT_APP_ENV=production
@@ -156,7 +156,7 @@ react/
 #### .env.example
 ```bash
 # Configuration API
-VITE_API_URL=http://localhost:9080/api
+VITE_API_URL=https://gestionstage-frontend-backend.onrender.com/api
 
 # Configuration application
 VITE_ENV=development
@@ -170,7 +170,7 @@ VITE_LOG_LEVEL=debug
 #### .env.local (non versionné)
 ```bash
 # Remplacer avec vos valeurs locales
-VITE_API_URL=http://localhost:9080/api
+VITE_API_URL=https://gestionstage-frontend-backend.onrender.com/api
 ```
 
 ### Configuration Axios
