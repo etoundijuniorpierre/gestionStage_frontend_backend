@@ -35,8 +35,6 @@ import StudentInternshipList from './components/student/StudentInternshipList';
 import MyStudentInternship from './components/student/MyStudentInternship';
 import StudentProfile from './components/student/StudentProfile';
 import Congratulations from './components/Congratulations';
-import PageTransition from './components/PageTransition';
-import { usePageLoading } from './hooks/usePageLoading';
 
 const AnimatedRoutes = () => {
   const location = useLocation();
@@ -44,7 +42,7 @@ const AnimatedRoutes = () => {
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
-        <Route path="/" element={<PageWrapper><RoleRedirector /></PageWrapper>} />
+        <Route path="/" element={<PageWrapper><LoginPage /></PageWrapper>} />
         <Route path="/login" element={<PageWrapper><LoginPage /></PageWrapper>} />
         <Route path="/verification" element={<PageWrapper><VerificationPage /></PageWrapper>} />
         <Route path="/reset-password" element={<PageWrapper><ResetPassword /></PageWrapper>} />
@@ -105,20 +103,16 @@ const AnimatedRoutes = () => {
 };
 
 const PageWrapper = ({ children }: { children: React.ReactNode }) => {
-  const { isLoading } = usePageLoading();
-  
   return (
-    <PageTransition isLoading={isLoading}>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.2, ease: "easeOut" }}
-        className="min-h-screen"
-      >
-        {children}
-      </motion.div>
-    </PageTransition>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2, ease: "easeOut" }}
+      className="min-h-screen"
+    >
+      {children}
+    </motion.div>
   );
 };
 
