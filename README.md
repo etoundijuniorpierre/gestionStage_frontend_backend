@@ -21,9 +21,8 @@ Application de gestion de stages avec frontend React et backend Spring Boot, dé
 ## 🚀 Déploiement en Production
 
 ### URLs de production
-- **Frontend** : `https://your-app.vercel.app`
-- **Backend API** : `https://internship-management-api.onrender.com/api`
-- **Health Check** : `https://internship-management-api.onrender.com/api/health`
+- **Frontend** : `https://gestion-stage-frontend-backend.vercel.app`
+- **Backend API** : `https://gestionstage-frontend-backend.onrender.com/api`
 
 ### Workflow de déploiement
 1. **Développement** sur branche `develop`
@@ -106,12 +105,14 @@ docker-compose up -d
 ### Variables d'environnement
 
 #### Backend
-- `DB_URL` : URL de connexion PostgreSQL
-- `DB_USERNAME` : Nom d'utilisateur base de données
+- `DB_HOST` : Hôte PostgreSQL
+- `DB_NAME` : Nom de la base de données
+- `DB_USER` : Nom d'utilisateur base de données
 - `DB_PASSWORD` : Mot de passe base de données
 - `JWT_SECRET` : Clé secrète JWT
 - `MAIL_USERNAME` : Email Gmail
 - `MAIL_PASSWORD` : Mot de passe Gmail
+- `ALLOWED_ORIGINS` : Origines CORS autorisées
 
 #### Frontend
 - `VITE_API_URL` : URL de l'API backend

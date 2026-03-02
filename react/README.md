@@ -28,9 +28,9 @@ Application frontend React pour la gestion de stages, déployée sur Vercel avec
 ## 🚀 Déploiement en Production
 
 ### Configuration de production
-- **URL** : `https://your-app.vercel.app`
+- **URL Frontend** : `https://gestion-stage-frontend-backend.vercel.app`
+- **URL Backend** : `https://gestionstage-frontend-backend.onrender.com/api`
 - **Branche** : `prod`
-- **API Backend** : `https://gestionstage-frontend-backend.onrender.com/api`
 - **Build** : Automatique sur push vers `prod`
 
 ### Variables d'environnement (Production)
