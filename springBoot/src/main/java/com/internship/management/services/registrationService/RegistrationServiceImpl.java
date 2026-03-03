@@ -1,7 +1,5 @@
 package com.internship.management.services.registrationService;
 
-
-
 import com.internship.management.entities.*;
 import com.internship.management.repositories.*;
 import com.internship.management.interfaces.InternshipService;
@@ -20,17 +18,18 @@ public class RegistrationServiceImpl implements InternshipService {
     private final UsersRepository userRepository;
 
     @Transactional
-   public void registerEnterprise(Enterprise enterprise) {
+    public void registerEnterprise(Enterprise enterprise) {
 
-       boolean isEnterpriseEmailExists = userRepository.existsByEmail(enterprise.getEmail());
-       if (isEnterpriseEmailExists) {
-           throw new IllegalStateException("user with email " + enterprise.getEmail() + " already exists");
-       }
+        boolean isEnterpriseEmailExists = userRepository.existsByEmail(enterprise.getEmail());
+        if (isEnterpriseEmailExists) {
+            throw new IllegalStateException("user with email " + enterprise.getEmail() + " already exists");
+        }
 
-       Enterprise newEnterprise = enterpriseRepository.save(enterprise);
-       verificationTokenService.createAndSendToken(newEnterprise);
+        Enterprise newEnterprise = enterpriseRepository.save(enterprise);
+        verificationTokenService.createAndSendToken(newEnterprise);
     }
 
+    @Transactional
     public void registerStudent(Student student) {
 
         boolean isStudentEmailExists = userRepository.existsByEmail(student.getEmail());
@@ -42,6 +41,7 @@ public class RegistrationServiceImpl implements InternshipService {
         verificationTokenService.createAndSendToken(newStudent);
     }
 
+    @Transactional
     public void registerTeacher(Teacher teacher) {
 
         boolean isTeacherEmailExists = userRepository.existsByEmail(teacher.getEmail());
@@ -55,7 +55,7 @@ public class RegistrationServiceImpl implements InternshipService {
     }
 
     public Users getUserByEmail(String email) {
-       return userRepository.findByEmail(email).orElse(null);
+        return userRepository.findByEmail(email).orElse(null);
     }
 
 }

@@ -1,4 +1,5 @@
 import './App.css'
+import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import OffersList from './components/teacher/OffersList';
@@ -115,6 +116,12 @@ const PageWrapper = ({ children }: { children: React.ReactNode }) => {
 };
 
 const App = () => {
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL || 'https://gestionstage-frontend-backend.onrender.com/api'}/login/health`)
+      .then(() => console.log('Backend wake-up ping sent'))
+      .catch(() => {});
+  }, []);
+
   return (
     <Router>
       <AnimatedRoutes />
