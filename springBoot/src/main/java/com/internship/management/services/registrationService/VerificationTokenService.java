@@ -6,13 +6,13 @@ import com.internship.management.repositories.UsersRepository;
 import com.internship.management.repositories.VerificationTokenRepository;
 import com.internship.management.enums.UserStatus;
 import lombok.RequiredArgsConstructor;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
+import org.springframework.web.client.RestTemplate;
 import java.time.LocalDateTime;
-import java.util.Random;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -21,8 +21,16 @@ public class VerificationTokenService {
     private final VerificationTokenRepository tokenRepository;
     private final UsersRepository userRepository;
     private final RegistrationMapper registrationMapper;
+    private final RestTemplate restTemplate = new RestTemplate();
 
-    private final JavaMailSender mailSender;
+    @Value("${brevo.api.key}")
+    private String apiKey;
+
+    @Value("${brevo.sender.email}")
+    private String senderEmail;
+
+    @Value("${brevo.sender.name}")
+    private String senderName;
 
     public String generateCode() {
         return String.valueOf(new Random().nextInt(90000) + 10000);
@@ -78,14 +86,28 @@ public class VerificationTokenService {
     }
 
     private void sendEmail(String toEmail, String code) {
+        String url = "https://api.brevo.com/v3/smtp/email";
 
-        SimpleMailMessage message = new SimpleMailMessage();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("api-key", apiKey);
 
-        message.setTo(toEmail);
-        message.setSubject("Your account verification code");
-        message.setText(
-                "Hello, \n\nHere is your verification code: " + code + " \n\nBest regards, Internship Platform.");
+        Map<String, Object> body = new HashMap<>();
+        body.put("sender", Map.of("email", senderEmail, "name", senderName));
+        body.put("to", List.of(Map.of("email", toEmail)));
+        body.put("subject", "Votre code de vérification");
+        body.put("htmlContent", "<html><body><p>Bonjour,</p><p>Voici votre code de vérification : <b>" + code
+                + "</b></p><p>Cordialement,<br>L'équipe Internship Platform</p></body></html>");
 
-        mailSender.send(message);
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
+
+        try {
+            ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                throw new RuntimeException("Erreur lors de l'envoi de l'email : " + response.getBody());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Échec de la connexion à l'API Brevo : " + e.getMessage());
+        }
     }
 }
