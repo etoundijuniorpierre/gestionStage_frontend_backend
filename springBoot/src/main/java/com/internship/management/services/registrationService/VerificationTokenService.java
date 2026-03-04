@@ -1,6 +1,5 @@
 package com.internship.management.services.registrationService;
 
-
 import com.internship.management.entities.*;
 import com.internship.management.mappers.RegistrationMapper;
 import com.internship.management.repositories.UsersRepository;
@@ -84,7 +83,8 @@ public class VerificationTokenService {
 
         message.setTo(toEmail);
         message.setSubject("Your account verification code");
-        message.setText("Hello, \n\nHere is your verification code: " + code + " \n\nBest regards, Internship Platform.");
+        message.setText(
+                "Hello, \n\nHere is your verification code: " + code + " \n\nBest regards, Internship Platform.");
 
         mailSender.send(message);
     }

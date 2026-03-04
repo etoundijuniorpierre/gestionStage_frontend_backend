@@ -39,4 +39,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=5 \
 
 # Lancer l'application avec les options JVM optimisées
 # Utilisation de sh -c pour permettre l'expansion des variables d'environnement
-ENTRYPOINT ["sh", "-c", "java ${JAVA_OPTS} -jar app.jar"]
+ENTRYPOINT ["sh", "-c", "java ${JAVA_OPTS} -Djava.net.preferIPv4Stack=true -jar app.jar"]
